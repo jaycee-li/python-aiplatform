@@ -39,6 +39,7 @@ from google.cloud.aiplatform.metadata import experiment_resources
 from google.cloud.aiplatform.metadata import metadata
 from google.cloud.aiplatform.metadata import resource
 from google.cloud.aiplatform.metadata import utils as metadata_utils
+from google.cloud.aiplatform.metadata.schema.system import artifact_schema
 from google.cloud.aiplatform.tensorboard import tensorboard_resource
 from google.cloud.aiplatform.utils import rest_utils
 
@@ -988,6 +989,73 @@ class ExperimentRun(
         else:
             # TODO: query the latest metrics artifact resource before logging.
             self._metadata_node.update(metadata={constants._METRIC_KEY: metrics})
+
+    def log_classification_metrics(
+        self,
+        *,
+        display_name: Optional[str] = None,
+        labels: Optional[List[str]] = None,
+        matrix: Optional[List[List[int]]] = None,
+        fpr: Optional[List[float]] = None,
+        tpr: Optional[List[float]] = None,
+        thresholds: Optional[List[float]] = None,
+    ):
+        """Log metrics for classification models. Currently support confusion matrix and ROC curve.
+
+        Metrics with the same key will be overwritten.
+
+        ```
+        my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
+        my_run.log_metrics({'accuracy': 0.9, 'recall': 0.8})
+        ```
+
+        Args:
+            display_name (str):
+                Optional. The user-defined name for the metrics.
+            labels (List[str]):
+                Optional. List of label names for the confusion matrix. Must be set if 'matrix' is set.
+            matrix (List[List[int]):
+                Optional. Values for the confusion matrix. Must be set if 'labels' is set.
+            fpr (List[float]):
+                Optional. List of false positive rates for the ROC curve. Must be set if 'tpr' or 'thresholds' is set.
+            tpr (List[float]):
+                Optional. List of true positive rates for the ROC curve. Must be set if 'fpr' or 'thresholds' is set.
+            thresholds (List[float]):
+                Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
+        """
+        if (labels or matrix) and not (labels and matrix):
+            raise ValueError("labels and matrix must be set together.")
+
+        if (fpr or tpr or thresholds) and not (fpr and tpr and thresholds):
+            raise ValueError("fpr, tpr, and thresholds must be set together.")
+
+        metadata = {}
+        if labels and matrix:
+            confusion_matrix = {
+                "annotationSpecs": labels,
+                "rows": matrix,
+            }
+            metadata["confusionMatrix"] = confusion_matrix
+
+        if fpr and tpr and thresholds:
+            confident_metrics = [
+                {
+                    "confidenceThreshold": thresholds[i],
+                    "recall": tpr[i],
+                    "falsePositiveRate": fpr[i],
+                }
+                for i in range(len(fpr))
+            ]
+            metadata["confidenceMetrics"] = confident_metrics
+
+        classification_metrics = artifact_schema.ClassificationMetrics(
+            display_name=display_name,
+            metadata=metadata,
+        )
+        classfication_metrics = classification_metrics.create()
+        self._metadata_node.add_artifacts_and_executions(
+            artifact_resource_names=[classfication_metrics.resource_name]
+        )
 
     @_v1_not_supported
     def get_time_series_data_frame(self) -> "pd.DataFrame":  # noqa: F821
