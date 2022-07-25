@@ -15,8 +15,7 @@
 # limitations under the License.
 #
 
-
-from typing import Dict, Union, Optional, Any
+from typing import Dict, Union, Optional, Any, List
 
 from google.api_core import exceptions
 from google.auth import credentials as auth_credentials
