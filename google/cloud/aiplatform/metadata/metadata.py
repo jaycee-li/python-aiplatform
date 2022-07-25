@@ -371,6 +371,44 @@ class _ExperimentTracker:
         # query the latest metrics artifact resource before logging.
         self._experiment_run.log_metrics(metrics=metrics)
 
+    def log_classification_metrics(
+        self,
+        *,
+        display_name: Optional[str] = None,
+        labels: Optional[List[str]] = None,
+        matrix: Optional[List[List[int]]] = None,
+        fpr: Optional[List[float]] = None,
+        tpr: Optional[List[float]] = None,
+        thresholds: Optional[List[float]] = None,
+    ):
+        """Log metrics for classification models. Currently support confusion matrix and ROC curve.
+
+        Args:
+            display_name (str):
+                Optional. The user-defined name for the metrics.
+            labels (List[str]):
+                Optional. List of label names for the confusion matrix. Must be set if 'matrix' is set.
+            matrix (List[List[int]):
+                Optional. Values for the confusion matrix. Must be set if 'labels' is set.
+            fpr (List[float]):
+                Optional. List of false positive rates for the ROC curve. Must be set if 'tpr' or 'thresholds' is set.
+            tpr (List[float]):
+                Optional. List of true positive rates for the ROC curve. Must be set if 'fpr' or 'thresholds' is set.
+            thresholds (List[float]):
+                Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
+        """
+
+        self._validate_experiment_and_run(method_name="log_classification_metrics")
+        # query the latest metrics artifact resource before logging.
+        self._experiment_run.log_classification_metrics(
+            display_name=display_name,
+            labels=labels,
+            matrix=matrix,
+            fpr=fpr,
+            tpr=tpr,
+            thresholds=thresholds,
+        )
+
     def _validate_experiment_and_run(self, method_name: str):
         """Validates Experiment and Run are set and raises informative error message.
 
