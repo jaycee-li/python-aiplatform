@@ -1033,12 +1033,12 @@ class ExperimentRun(
         if labels and matrix:
             confusion_matrix = {
                 "annotationSpecs": [{"displayName": label} for label in labels],
-                "rows": matrix,
+                "rows": [{"row": row} for row in matrix],
             }
             metadata["confusionMatrix"] = confusion_matrix
 
         if fpr and tpr and thresholds:
-            confident_metrics = [
+            metadata["confidenceMetrics"] = [
                 {
                     "confidenceThreshold": thresholds[i],
                     "recall": tpr[i],
@@ -1046,7 +1046,6 @@ class ExperimentRun(
                 }
                 for i in range(len(fpr))
             ]
-            metadata["confidenceMetrics"] = confident_metrics
 
         classification_metrics = artifact_schema.ClassificationMetrics(
             display_name=display_name,
