@@ -308,7 +308,7 @@ class ClassificationMetrics(base_artifact.BaseArtifactSchema):
         """
         extended_metadata = copy.deepcopy(metadata) if metadata else {}
 
-        super(Metrics, self).__init__(
+        super(ClassificationMetrics, self).__init__(
             uri=uri,
             artifact_id=artifact_id,
             display_name=display_name,
