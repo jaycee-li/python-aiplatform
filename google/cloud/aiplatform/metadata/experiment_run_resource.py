@@ -1032,7 +1032,7 @@ class ExperimentRun(
         metadata = {}
         if labels and matrix:
             confusion_matrix = {
-                "annotationSpecs": labels,
+                "annotationSpecs": [{"displayName": label} for label in labels],
                 "rows": matrix,
             }
             metadata["confusionMatrix"] = confusion_matrix
