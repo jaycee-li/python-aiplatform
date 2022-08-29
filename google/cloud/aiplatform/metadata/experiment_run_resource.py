@@ -940,7 +940,7 @@ class ExperimentRun(
                 Required. Parameter key/value pairs.
 
         Raises:
-            ValueError: If key is not str or value is not float, int, str.
+            TypeError: If key is not str or value is not float, int, str.
         """
         # query the latest run execution resource before logging.
         for key, value in params.items():
@@ -969,7 +969,7 @@ class ExperimentRun(
         ```
 
         Args:
-            metrics (Dict[str, Union[float, int]]):
+            metrics (Dict[str, Union[float, int, str]]):
                 Required. Metrics key/value pairs.
         Raises:
             TypeError: If keys are not str or values are not float, int, or str.
