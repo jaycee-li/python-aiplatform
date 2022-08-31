@@ -998,15 +998,17 @@ class ExperimentRun(
         matrix: Optional[List[List[int]]] = None,
         fpr: Optional[List[float]] = None,
         tpr: Optional[List[float]] = None,
-        thresholds: Optional[List[float]] = None,
+        threshold: Optional[List[float]] = None,
     ):
         """Log metrics for classification models. Currently support confusion matrix and ROC curve.
 
-        Metrics with the same key will be overwritten.
-
         ```
         my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
-        my_run.log_metrics({'accuracy': 0.9, 'recall': 0.8})
+        my_run.log_classification_metrics(
+            display_name='my_confusion_matrix',
+            labels=['cat', 'dog'],
+            matrix=[[9, 1], [1,9]]
+        )
         ```
 
         Args:
@@ -1020,14 +1022,32 @@ class ExperimentRun(
                 Optional. List of false positive rates for the ROC curve. Must be set if 'tpr' or 'thresholds' is set.
             tpr (List[float]):
                 Optional. List of true positive rates for the ROC curve. Must be set if 'fpr' or 'thresholds' is set.
-            thresholds (List[float]):
+            threshold (List[float]):
                 Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
         """
         if (labels or matrix) and not (labels and matrix):
             raise ValueError("labels and matrix must be set together.")
 
-        if (fpr or tpr or thresholds) and not (fpr and tpr and thresholds):
+        if (fpr or tpr or threshold) and not (fpr and tpr and threshold):
             raise ValueError("fpr, tpr, and thresholds must be set together.")
+
+        if len(matrix) != len(labels):
+            raise ValueError(
+                "Length of labels and matrix must be the same. "
+                "Got lengths {} and {} respectively.".format(len(labels), len(matrix))
+            )
+
+        if (
+            len(fpr) != len(tpr)
+            or len(fpr) != len(threshold)
+            or len(tpr) != len(threshold)
+        ):
+            raise ValueError(
+                "Length of fpr, tpr and threshold must be the same. "
+                "Got lengths {}, {} and {} respectively.".format(
+                    len(fpr), len(tpr), len(threshold)
+                )
+            )
 
         metadata = {}
         if labels and matrix:
@@ -1037,10 +1057,10 @@ class ExperimentRun(
             }
             metadata["confusionMatrix"] = confusion_matrix
 
-        if fpr and tpr and thresholds:
+        if fpr and tpr and threshold:
             metadata["confidenceMetrics"] = [
                 {
-                    "confidenceThreshold": thresholds[i],
+                    "confidenceThreshold": threshold[i],
                     "recall": tpr[i],
                     "falsePositiveRate": fpr[i],
                 }
@@ -1214,6 +1234,49 @@ class ExperimentRun(
             return self._metadata_metric_artifact.metadata
         else:
             return self._metadata_node.metadata[constants._METRIC_KEY]
+
+    def get_classification_metrics(self) -> List[Dict[str, Union[str, list]]]:
+        """Get the classification metrics logged to this run.
+
+        Returns:
+            Classification metrics logged to this experiment run.
+        """
+
+        artifact_list = artifact.Artifact.list(
+            filter=metadata_utils._make_filter_string(
+                in_context=[self.resource_name],
+                schema_title="system.ClassificationMetrics",
+            ),
+            project=self.project,
+            location=self.location,
+            credentials=self.credentials,
+        )
+
+        metrics = []
+        for metric_artifact in artifact_list:
+            metric = {}
+            metric["id"] = metric_artifact.name
+            metric["display_name"] = metric_artifact.display_name
+            metadata = metric_artifact.metadata
+            if "confusionMatrix" in metadata:
+                metric["labels"] = [
+                    d["displayName"]
+                    for d in metadata["confusionMatrix"]["annotationSpecs"]
+                ]
+                metric["matrix"] = [
+                    d["row"] for d in metadata["confusionMatrix"]["rows"]
+                ]
+            if "confidenceMetrics" in metadata:
+                metric["fpr"] = [
+                    d["falsePositiveRate"] for d in metadata["confidenceMetrics"]
+                ]
+                metric["tpr"] = [d["recall"] for d in metadata["confidenceMetrics"]]
+                metric["threshold"] = [
+                    d["confidenceThreshold"] for d in metadata["confidenceMetrics"]
+                ]
+            metrics.append(metric)
+
+        return metrics
 
     @_v1_not_supported
     def associate_execution(self, execution: execution.Execution):
