@@ -172,8 +172,9 @@ class TestExperiments(e2e_base.TestEndToEnd):
 
         run = aiplatform.ExperimentRun(run_name=_RUN, experiment=self._experiment_name)
         metrics = run.get_classification_metrics()[0]
-        shared_state["resource"].append(aiplatform.Artifact(metrics.pop("id")))
+        metric_artifact = aiplatform.Artifact(metrics.pop("id"))
         assert metrics == _CLASSIFICATION_METRICS
+        metric_artifact.delete()
 
     def test_create_artifact(self, shared_state):
         ds = aiplatform.Artifact.create(
