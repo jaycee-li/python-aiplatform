@@ -378,7 +378,7 @@ class _ExperimentTracker:
         matrix: Optional[List[List[int]]] = None,
         fpr: Optional[List[float]] = None,
         tpr: Optional[List[float]] = None,
-        thresholds: Optional[List[float]] = None,
+        threshold: Optional[List[float]] = None,
     ):
         """Log metrics for classification models. Currently support confusion matrix and ROC curve.
 
@@ -393,7 +393,7 @@ class _ExperimentTracker:
                 Optional. List of false positive rates for the ROC curve. Must be set if 'tpr' or 'thresholds' is set.
             tpr (List[float]):
                 Optional. List of true positive rates for the ROC curve. Must be set if 'fpr' or 'thresholds' is set.
-            thresholds (List[float]):
+            threshold (List[float]):
                 Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
         """
 
@@ -405,7 +405,7 @@ class _ExperimentTracker:
             matrix=matrix,
             fpr=fpr,
             tpr=tpr,
-            thresholds=thresholds,
+            threshold=threshold,
         )
 
     def _validate_experiment_and_run(self, method_name: str):
