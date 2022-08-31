@@ -1235,7 +1235,7 @@ class ExperimentRun(
         else:
             return self._metadata_node.metadata[constants._METRIC_KEY]
 
-    def get_classification_metrics(self) -> List[Dict[str, Union[str, list]]]:
+    def get_classification_metrics(self) -> List[Dict[str, Union[str, List]]]:
         """Get the classification metrics logged to this run.
 
         Returns:
