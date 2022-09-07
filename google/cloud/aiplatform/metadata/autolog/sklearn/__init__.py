@@ -418,7 +418,7 @@ def _autolog(
         params_logging_future.await_completion()
         _experiment_tracker._experiment_run = aiplatform.ExperimentRun(
             run_name=_experiment_tracker.experiment_run.name,
-            experiment=_experiment_tracker.experiment_name
+            experiment=_experiment_tracker.experiment_name,
         )
         return fit_output
 
