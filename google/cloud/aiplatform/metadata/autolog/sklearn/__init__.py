@@ -20,6 +20,7 @@ from typing import Optional, Dict, Union
 
 import proto
 import logging
+from google.cloud import aiplatform
 import sklearn
 import numpy as np
 from collections import defaultdict
@@ -415,6 +416,10 @@ def _autolog(
         _log_posttraining_metadata(autologging_queue, self, X, y_true, sample_weight)
         autologging_queue.flush(synchronous=True)
         params_logging_future.await_completion()
+        _experiment_tracker._experiment_run = aiplatform.ExperimentRun(
+            _experiment_tracker.experiment_run.name, 
+            _experiment_tracker.experiment_name,
+        )
         return fit_output
 
     def _log_pretraining_data(
