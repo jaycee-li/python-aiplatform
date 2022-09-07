@@ -28,10 +28,10 @@ import logging
 from google.cloud import aiplatform
 from google.cloud.aiplatform.metadata.metadata import _experiment_tracker
 from google.cloud.aiplatform.metadata.autolog import gorilla
-from google.cloud.aiplatform.metadata.autolog import (
-    get_autologging_config,
-    autologging_is_disabled,
-)
+# from google.cloud.aiplatform.metadata.autolog import (
+#     get_autologging_config,
+#     autologging_is_disabled,
+# )
 from google.cloud.aiplatform.metadata.autolog.events import AutologgingEventLogger
 
 
