@@ -261,7 +261,10 @@ class AutologgingQueue:
 
         operation_results = []
         if pending_operations.params_queue:
-            run = aiplatform.ExperimentRun(pending_operations.run_name, self.experiment_name)
+            run = aiplatform.ExperimentRun(
+                run=pending_operations.run_name, 
+                experiment=self.experiment_name
+            )
             operation_results.append(
                 self._try_operation(
                     run.log_params,
@@ -269,7 +272,10 @@ class AutologgingQueue:
                 )
             )
         if pending_operations.metrics_queue:
-            run = aiplatform.ExperimentRun(pending_operations.run_name, self.experiment_name)
+            run = aiplatform.ExperimentRun(
+                run=pending_operations.run_name, 
+                experiment=self.experiment_name
+            )
             operation_results.append(
                 self._try_operation(
                     run.log_metrics,
@@ -277,7 +283,10 @@ class AutologgingQueue:
                 )
             )
         if pending_operations.end_run:
-            run = aiplatform.ExperimentRun(pending_operations.run_name, self.experiment_name)
+            run = aiplatform.ExperimentRun(
+                run=pending_operations.run_name, 
+                experiment=self.experiment_name
+            )
             operation_results.append(
                 self._try_operation(
                     run.end_run,
@@ -289,7 +298,7 @@ class AutologgingQueue:
         ]
         if len(failures) > 0:
             raise Exception(
-                f"Failed to perform one or more operations on the run {pending_operations.run_name}.\n"
+                f"Failed to perform one or more operations on the run {pending_operations.run_name}. "
                 + f"Failed operations: {failures}"
             )
 
