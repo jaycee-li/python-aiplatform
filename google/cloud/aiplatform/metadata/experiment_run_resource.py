@@ -1056,8 +1056,10 @@ class ExperimentRun(
             else gca_execution.Execution.State.COMPLETE
         )
 
-        metadata._experiment_tracker._experiment_run = self
-        metadata._experiment_tracker.end_run(state=state)
+        if metadata._experiment_tracker.experiment_run is self:
+            metadata._experiment_tracker.end_run(state=state)
+        else:
+            self.end_run(state)
 
     def end_run(
         self,
