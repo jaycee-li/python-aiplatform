@@ -416,10 +416,10 @@ def _autolog(
         _log_posttraining_metadata(autologging_queue, self, X, y_true, sample_weight)
         autologging_queue.flush(synchronous=True)
         params_logging_future.await_completion()
-        _experiment_tracker._experiment_run = aiplatform.ExperimentRun(
-            run_name=_experiment_tracker.experiment_run.name, 
-            experiment=_experiment_tracker.experiment,
-        )
+        # _experiment_tracker._experiment_run = aiplatform.ExperimentRun(
+        #     run_name=_experiment_tracker.experiment_run.name, 
+        #     experiment=_experiment_tracker.experiment,
+        # )
         return fit_output
 
     def _log_pretraining_data(
