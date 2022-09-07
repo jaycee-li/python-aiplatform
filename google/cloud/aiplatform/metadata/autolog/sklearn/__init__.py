@@ -409,7 +409,7 @@ def _autolog(
                 "No experimentRun set. Make sure to call aiplatform.start_run('my-run') before training your model."
             )
         _log_pretraining_data(autologging_queue, self, *args, **kwargs)
-        print(autologging_queue._pending_operations[_experiment_tracker.experiment_run.name].params)
+        print(autologging_queue._pending_operations[_experiment_tracker.experiment_run.name].params_queue)
         params_logging_future = autologging_queue.flush(synchronous=False)
         print(autologging_queue._pending_operations)
         fit_output = original(self, *args, **kwargs)
