@@ -256,8 +256,8 @@ class AutologgingQueue:
         if pending_operations.create_run:
             TIMESTAMP = datetime.now().strftime("%Y%m%d%H%M%S")
             run_name = f"sklearn-autologging-run-{TIMESTAMP}"
-            run = aiplatform.ExperimentRun.create(run_name, experiment=self._experiment)
-            pending_operations.run = run
+            aiplatform.start_run(run_name)
+            pending_operations.client = _experiment_tracker
 
         operation_results = []
         if pending_operations.params_queue:
@@ -286,7 +286,7 @@ class AutologgingQueue:
         ]
         if len(failures) > 0:
             raise Exception(
-                f"Failed to perform one or more operations on the run {pending_operations.run}.\n"
+                f"Failed to perform one or more operations on the run {pending_operations.client.experiment_run}.\n"
                 + f"Failed operations: {failures}"
             )
 
