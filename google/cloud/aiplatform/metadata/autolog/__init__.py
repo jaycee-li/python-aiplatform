@@ -23,7 +23,6 @@ from google.cloud.aiplatform.metadata.autolog.safety import *
 from google.cloud.aiplatform.metadata.autolog.events import *
 from google.cloud.aiplatform.metadata.autolog.client import *
 
-_logger = logging.getLogger(__name__)
 
 INPUT_EXAMPLE_SAMPLE_ROWS = 5
 ENSURE_AUTOLOGGING_ENABLED_TEXT = (
@@ -31,6 +30,19 @@ ENSURE_AUTOLOGGING_ENABLED_TEXT = (
 )
 AUTOLOGGING_CONF_KEY_IS_GLOBALLY_CONFIGURED = "globally_configured"
 AUTOLOGGING_INTEGRATIONS = {}
+FLAVOR_TO_MODULE_NAME_AND_VERSION_INFO_KEY = {
+    "fastai": ("fastai", "fastai"),
+    "gluon": ("mxnet", "gluon"),
+    "keras": ("keras", "keras"),
+    "lightgbm": ("lightgbm", "lightgbm"),
+    "statsmodels": ("statsmodels", "statsmodels"),
+    "tensorflow": ("tensorflow", "tensorflow"),
+    "xgboost": ("xgboost", "xgboost"),
+    "sklearn": ("sklearn", "sklearn"),
+    "pytorch": ("pytorch_lightning", "pytorch-lightning"),
+    "pyspark.ml": ("pyspark", "spark"),
+}
+
 
 
 def get_autologging_config(flavor_name, config_key, default_value=None):
@@ -58,13 +70,13 @@ def autologging_is_disabled(integration_name):
     if explicit_disabled:
         return True
 
-    if (
-        integration_name in FLAVOR_TO_MODULE_NAME_AND_VERSION_INFO_KEY
-        and not is_flavor_supported_for_associated_package_versions(integration_name)
-    ):
-        return get_autologging_config(
-            integration_name, "disable_for_unsupported_versions", False
-        )
+    # if (
+    #     integration_name in FLAVOR_TO_MODULE_NAME_AND_VERSION_INFO_KEY
+    #     and not is_flavor_supported_for_associated_package_versions(integration_name)
+    # ):
+    #     return get_autologging_config(
+    #         integration_name, "disable_for_unsupported_versions", False
+    #     )
 
     return False
 

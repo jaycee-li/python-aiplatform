@@ -16,8 +16,9 @@
 #
 
 import warnings
+import logging
 
-from google.cloud.aiplatform.metadata.autolog import _logger
+_logger = logging.getLogger(__name__)
 
 
 class AutologgingEventLogger:
