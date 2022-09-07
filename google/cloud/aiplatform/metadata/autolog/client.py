@@ -61,7 +61,7 @@ class RunOperations:
 
         if len(failed_operations) > 0:
             raise Exception(
-                f"The following failures occurred while performing one or more logging operations: {failures}"
+                f"The following failures occurred while performing one or more logging operations: {failed_operations}"
             )
 
 
@@ -251,23 +251,19 @@ class AutologgingQueue:
             run = aiplatform.ExperimentRun.create(run_name, experiment=self._experiment)
             pending_operations.run = run
 
-        assert not isinstance(
-            pending_operations.run_name, PendingRunName
-        ), "Run name cannot be pending for logging"
-
         operation_results = []
-        if pending_operations.params:
+        if pending_operations.params_queue:
             operation_results.append(
                 self._try_operation(
                     pending_operations.run.log_params,
-                    params=pending_operations.params,
+                    params=pending_operations.params_queue,
                 )
             )
-        if pending_operations.metrics:
+        if pending_operations.metrics_queue:
             operation_results.append(
                 self._try_operation(
                     pending_operations.run.log_metrics,
-                    metrics=pending_operations.metrics,
+                    metrics=pending_operations.metrics_queue,
                 )
             )
         if pending_operations.end_run:
