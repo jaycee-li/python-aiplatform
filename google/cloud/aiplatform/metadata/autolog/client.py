@@ -70,8 +70,8 @@ class _PendingRunOperations:
     Represents a collection of queued / pending  ExperimentRun operations.
     """
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, run):
+        self.run = run
         self.create_run = None
         self.end_run = None
         self.params_queue = {}
@@ -203,7 +203,7 @@ class AutologgingQueue:
         """
         if run_name not in self._pending_operations:
             self._pending_operations[run_name] = _PendingRunOperations(
-                client=_experiment_tracker
+                run=aiplatform.ExperimentRun(run_name, self._experiment)
             )
         return self._pending_operations[run_name]
 
@@ -263,21 +263,21 @@ class AutologgingQueue:
         if pending_operations.params_queue:
             operation_results.append(
                 self._try_operation(
-                    self.client.log_params,
+                    pending_operations.run.log_params,
                     params=pending_operations.params_queue,
                 )
             )
         if pending_operations.metrics_queue:
             operation_results.append(
                 self._try_operation(
-                    self.client.log_metrics,
+                    pending_operations.run.log_metrics,
                     metrics=pending_operations.metrics_queue,
                 )
             )
         if pending_operations.end_run:
             operation_results.append(
                 self._try_operation(
-                    self.client.end_run,
+                    pending_operations.run.end_run,
                 )
             )
 
