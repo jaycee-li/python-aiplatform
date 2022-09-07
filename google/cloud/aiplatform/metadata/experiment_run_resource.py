@@ -1058,8 +1058,15 @@ class ExperimentRun(
 
         if metadata._experiment_tracker.experiment_run is self:
             metadata._experiment_tracker.end_run(state=state)
+        elif metadata._experiment_tracker.experiment_run:
+            try:
+                metadata._experiment_tracker.end_run(state=state)
+                self = self.__class__(self._run_name, self._experiment)
+            except:
+                self.end_run(state=state)
+                metadata._experiment_tracker.experiment_run = None
         else:
-            self.end_run(state)
+            self.end_run(state=state)
 
     def end_run(
         self,
