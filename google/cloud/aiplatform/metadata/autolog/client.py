@@ -263,21 +263,21 @@ class AutologgingQueue:
         if pending_operations.params_queue:
             operation_results.append(
                 self._try_operation(
-                    pending_operations.client.log_params,
+                    self.client.log_params,
                     params=pending_operations.params_queue,
                 )
             )
         if pending_operations.metrics_queue:
             operation_results.append(
                 self._try_operation(
-                    pending_operations.client.log_metrics,
+                    self.client.log_metrics,
                     metrics=pending_operations.metrics_queue,
                 )
             )
         if pending_operations.end_run:
             operation_results.append(
                 self._try_operation(
-                    pending_operations.client.end_run,
+                    self.client.end_run,
                 )
             )
 
