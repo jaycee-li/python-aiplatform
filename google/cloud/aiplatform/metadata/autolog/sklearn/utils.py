@@ -245,7 +245,7 @@ def _log_estimator_content(
     metrics = _log_specialized_estimator_content(
         autologging_queue=autologging_queue,
         fitted_estimator=estimator,
-        run_id=run_name,
+        run_name=run_name,
         prefix=prefix,
         X=X,
         y_true=y_true,
