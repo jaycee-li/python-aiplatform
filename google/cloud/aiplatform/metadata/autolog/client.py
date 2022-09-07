@@ -262,7 +262,7 @@ class AutologgingQueue:
         operation_results = []
         if pending_operations.params_queue:
             run = aiplatform.ExperimentRun(
-                run=pending_operations.run_name, 
+                run_name=pending_operations.run_name, 
                 experiment=self.experiment_name
             )
             operation_results.append(
@@ -273,7 +273,7 @@ class AutologgingQueue:
             )
         if pending_operations.metrics_queue:
             run = aiplatform.ExperimentRun(
-                run=pending_operations.run_name, 
+                run_name=pending_operations.run_name, 
                 experiment=self.experiment_name
             )
             operation_results.append(
@@ -284,7 +284,7 @@ class AutologgingQueue:
             )
         if pending_operations.end_run:
             run = aiplatform.ExperimentRun(
-                run=pending_operations.run_name, 
+                run_name=pending_operations.run_name, 
                 experiment=self.experiment_name
             )
             operation_results.append(
