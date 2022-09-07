@@ -71,7 +71,7 @@ class _PendingRunOperations:
     """
 
     def __init__(self, run):
-        #self.run = run
+        self.run = run
         self.create_run = None
         self.end_run = None
         self.params_queue = {}
@@ -203,7 +203,7 @@ class AutologgingQueue:
         """
         if run_name not in self._pending_operations:
             self._pending_operations[run_name] = _PendingRunOperations(
-                #run=aiplatform.ExperimentRun(run_name, experiment=self._experiment)
+                run=_experiment_tracker.experiment_run
             )
         return self._pending_operations[run_name]
 
@@ -263,24 +263,21 @@ class AutologgingQueue:
         if pending_operations.params_queue:
             operation_results.append(
                 self._try_operation(
-                    #pending_operations.run.log_params,
-                    aiplatform.log_params,
+                    pending_operations.run.log_params,
                     params=pending_operations.params_queue,
                 )
             )
         if pending_operations.metrics_queue:
             operation_results.append(
                 self._try_operation(
-                    #pending_operations.run.log_metrics,
-                    aiplatform.log_metrics,
+                    pending_operations.run.log_metrics,
                     metrics=pending_operations.metrics_queue,
                 )
             )
         if pending_operations.end_run:
             operation_results.append(
                 self._try_operation(
-                    #pending_operations.run.end_run,
-                    aiplatform.end_run,
+                    pending_operations.run.end_run,
                 )
             )
 
