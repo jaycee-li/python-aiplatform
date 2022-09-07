@@ -174,6 +174,14 @@ class AutologgingQueue:
         """
         Enqueues a collection of Parameters to be logged to the run specified by `run_name`.
         """
+        params = {
+            k: v
+            if (
+                not isinstance(v, bool) and (isinstance(v, int) or isinstance(v, float))
+            )
+            else str(v)
+            for k, v in params.items()
+        }
         self._get_pending_operations(run_name).enqueue(params=params)
 
     def log_metrics(
@@ -278,7 +286,7 @@ class AutologgingQueue:
         ]
         if len(failures) > 0:
             raise Exception(
-                f"Failed to perform one or more operations on the run {run_name}.\n"
+                f"Failed to perform one or more operations on the run {pending_operations.run}.\n"
                 + f"Failed operations: {failures}"
             )
 

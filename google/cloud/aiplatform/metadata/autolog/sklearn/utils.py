@@ -272,9 +272,7 @@ def _log_estimator_content(
             _logger.warning(msg)
         else:
             score_key = prefix + "score"
-            autologging_queue.log_metrics(
-                run_name=run_name, metrics={score_key: score}
-            )
+            autologging_queue.log_metrics(run_name=run_name, metrics={score_key: score})
             metrics[score_key] = score
 
     return metrics

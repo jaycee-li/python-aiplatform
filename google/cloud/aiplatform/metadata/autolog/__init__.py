@@ -42,7 +42,6 @@ FLAVOR_TO_MODULE_NAME_AND_VERSION_INFO_KEY = {
 }
 
 
-
 def get_autologging_config(flavor_name, config_key, default_value=None):
     """
     Returns a desired config value for a specified autologging integration.

@@ -391,6 +391,7 @@ def _autolog(
     """
     Internal autologging function for scikit-learn models.
     """
+
     def fit_vertex(original, self, *args, **kwargs):
         """
         Autologging function that performs model training by executing the training method
@@ -409,7 +410,11 @@ def _autolog(
                 "No experimentRun set. Make sure to call aiplatform.start_run('my-run') before training your model."
             )
         _log_pretraining_data(autologging_queue, self, *args, **kwargs)
-        print(autologging_queue._pending_operations[_experiment_tracker.experiment_run.name].params_queue)
+        print(
+            autologging_queue._pending_operations[
+                _experiment_tracker.experiment_run.name
+            ].params_queue
+        )
         params_logging_future = autologging_queue.flush(synchronous=False)
         print(autologging_queue._pending_operations)
         fit_output = original(self, *args, **kwargs)
@@ -510,8 +515,6 @@ def _autolog(
                 return result
             else:
                 return original(self, *args, **kwargs)
-
-
 
     estimators_to_patch = sklearn_utils._gen_estimators_to_patch()
     patched_fit_impl = fit_vertex
