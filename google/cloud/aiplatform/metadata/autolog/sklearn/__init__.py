@@ -391,53 +391,6 @@ def _autolog(
     """
     Internal autologging function for scikit-learn models.
     """
-
-    estimators_to_patch = sklearn_utils._gen_estimators_to_patch()
-    patched_fit_impl = fit_vertex
-
-    for class_def in estimators_to_patch:
-        # Patch fitting methods
-        for func_name in ["fit", "fit_transform", "fit_predict"]:
-            sklearn_utils._patch_estimator_method_if_available(
-                flavor_name,
-                class_def,
-                func_name,
-                functools.partial(patched_fit, patched_fit_impl),
-                manage_run=True,
-            )
-
-        # # Patch inference methods
-        # for func_name in ["predict", "predict_proba", "transform", "predict_log_proba"]:
-        #     sklearn_utils._patch_estimator_method_if_available(
-        #         flavor_name,
-        #         class_def,
-        #         func_name,
-        #         patched_predict,
-        #         manage_run=False,
-        #     )
-
-        # # Patch scoring methods
-        # sklearn_utils._patch_estimator_method_if_available(
-        #     flavor_name,
-        #     class_def,
-        #     "score",
-        #     patched_model_score,
-        #     manage_run=False,
-        # )
-
-    def patched_fn_with_autolog_disabled(original, *args, **kwargs):
-        with disable_autologging():
-            return original(*args, **kwargs)
-
-    for disable_autolog_func_name in _apis_autologging_disabled:
-        safe_patch(
-            flavor_name,
-            sklearn.model_selection,
-            disable_autolog_func_name,
-            patched_fn_with_autolog_disabled,
-            manage_run=False,
-        )
-
     def fit_vertex(original, self, *args, **kwargs):
         """
         Autologging function that performs model training by executing the training method
@@ -553,3 +506,51 @@ def _autolog(
                 return result
             else:
                 return original(self, *args, **kwargs)
+
+
+
+    estimators_to_patch = sklearn_utils._gen_estimators_to_patch()
+    patched_fit_impl = fit_vertex
+
+    for class_def in estimators_to_patch:
+        # Patch fitting methods
+        for func_name in ["fit", "fit_transform", "fit_predict"]:
+            sklearn_utils._patch_estimator_method_if_available(
+                flavor_name,
+                class_def,
+                func_name,
+                functools.partial(patched_fit, patched_fit_impl),
+                manage_run=True,
+            )
+
+        # # Patch inference methods
+        # for func_name in ["predict", "predict_proba", "transform", "predict_log_proba"]:
+        #     sklearn_utils._patch_estimator_method_if_available(
+        #         flavor_name,
+        #         class_def,
+        #         func_name,
+        #         patched_predict,
+        #         manage_run=False,
+        #     )
+
+        # # Patch scoring methods
+        # sklearn_utils._patch_estimator_method_if_available(
+        #     flavor_name,
+        #     class_def,
+        #     "score",
+        #     patched_model_score,
+        #     manage_run=False,
+        # )
+
+    def patched_fn_with_autolog_disabled(original, *args, **kwargs):
+        with disable_autologging():
+            return original(*args, **kwargs)
+
+    for disable_autolog_func_name in _apis_autologging_disabled:
+        safe_patch(
+            flavor_name,
+            sklearn.model_selection,
+            disable_autolog_func_name,
+            patched_fn_with_autolog_disabled,
+            manage_run=False,
+        )
