@@ -195,7 +195,7 @@ class AutologgingQueue:
         """
         if run_name not in self._pending_operations:
             self._pending_operations[run_name] = _PendingRunOperations(
-                run_name=run_name
+                run=aiplatform.ExperimentRun(run_name, experiment=self._experiment)
             )
         return self._pending_operations[run_name]
 
