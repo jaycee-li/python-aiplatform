@@ -16,8 +16,6 @@
 #
 
 
-import inspect
-import logging
 import contextlib
 from google.cloud.aiplatform.metadata.autolog.safety import *
 from google.cloud.aiplatform.metadata.autolog.events import *

@@ -19,10 +19,9 @@
 from typing import Optional, Dict, Union
 
 import proto
-import base
+import logging
 import sklearn
 import numpy as np
-import pandas as pd
 from collections import defaultdict
 import functools
 from google.cloud.aiplatform.metadata.autolog.sklearn import utils as sklearn_utils
@@ -34,7 +33,7 @@ from google.cloud.aiplatform.metadata.autolog import (
 )
 from google.cloud.aiplatform.metadata.metadata import _experiment_tracker
 
-_logger = base.Logger(__name__)
+_logger = logging.Logger(__name__)
 _SklearnTrainingSession = _get_new_training_session_class()
 
 FLAVOR_NAME = "sklearn"
