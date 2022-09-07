@@ -214,7 +214,7 @@ def _log_specialized_estimator_content(
 
 
 def _log_estimator_content(
-    autologging_client,
+    autologging_queue,
     estimator,
     run_name,
     prefix,
@@ -227,7 +227,7 @@ def _log_estimator_content(
     Logs content for the given estimator, which includes metrics and artifacts that might be
     tailored to the estimator's type (e.g., regression vs classification). Training labels
     are required for metric computation; metrics will be omitted if labels are not available.
-    :param autologging_client: An instance of `MlflowAutologgingQueueingClient` used for
+    :param autologging_queue: An instance of `MlflowAutologgingQueueingClient` used for
                                efficiently logging run data to MLflow Tracking.
     :param estimator: The estimator used to compute metrics and artifacts.
     :param run_id: The run under which the content is logged.
@@ -243,7 +243,7 @@ def _log_estimator_content(
     :return: A dict of the computed metrics.
     """
     metrics = _log_specialized_estimator_content(
-        autologging_client=autologging_client,
+        autologging_queue=autologging_queue,
         fitted_estimator=estimator,
         run_id=run_name,
         prefix=prefix,
@@ -272,7 +272,7 @@ def _log_estimator_content(
             _logger.warning(msg)
         else:
             score_key = prefix + "score"
-            autologging_client.log_metrics(
+            autologging_queue.log_metrics(
                 run_name=run_name, metrics={score_key: score}
             )
             metrics[score_key] = score

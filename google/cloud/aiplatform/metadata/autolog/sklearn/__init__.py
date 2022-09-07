@@ -409,7 +409,7 @@ def _autolog(
                 "No experimentRun set. Make sure to call aiplatform.start_run('my-run') before training your model."
             )
         _log_pretraining_data(autologging_queue, self, *args, **kwargs)
-        print(autologging_queue._pending_operations)
+        print(autologging_queue._pending_operations[_experiment_tracker.experiment_run.name].params)
         params_logging_future = autologging_queue.flush(synchronous=False)
         print(autologging_queue._pending_operations)
         fit_output = original(self, *args, **kwargs)
@@ -428,7 +428,7 @@ def _autolog(
         This is intended to be invoked within a patched scikit-learn training routine
         (e.g., `fit()`, `fit_transform()`, ...) and assumes the existence of an active
         MLflow run that can be referenced via the fluent Tracking API.
-        :param autologging_client: An instance of `MlflowAutologgingQueueingClient` used for
+        :param autologging_queue: An instance of `MlflowAutologgingQueueingClient` used for
                                    efficiently logging run data to MLflow Tracking.
         :param estimator: The scikit-learn estimator for which to log metadata.
         :param args: The arguments passed to the scikit-learn training routine (e.g.,
@@ -449,7 +449,7 @@ def _autolog(
         This is intended to be invoked within a patched scikit-learn training routine
         (e.g., `fit()`, `fit_transform()`, ...) and assumes the existence of an active
         MLflow run that can be referenced via the fluent Tracking API.
-        :param autologging_client: An instance of `MlflowAutologgingQueueingClient` used for
+        :param autologging_queue: An instance of `MlflowAutologgingQueueingClient` used for
                                    efficiently logging run data to MLflow Tracking.
         :param estimator: The scikit-learn estimator for which to log metadata.
         :param X: The training dataset samples passed to the ``estimator.fit()`` function.
@@ -459,7 +459,7 @@ def _autolog(
 
         # log common metrics and artifacts for estimators (classifier, regressor)
         logged_metrics = sklearn_utils._log_estimator_content(
-            autologging_client=autologging_queue,
+            autologging_queue=autologging_queue,
             estimator=estimator,
             prefix="training_",
             run_name=_experiment_tracker.experiment_run.name,
