@@ -104,7 +104,8 @@ class ExperimentRun(
         ```
 
         Args:
-            run (str): Required. The name of this run.
+            run_name (str):
+                Required. The name of this run.
             experiment (Union[experiment_resources.Experiment, str]):
                 Required. The name or instance of this experiment.
             project (str):
