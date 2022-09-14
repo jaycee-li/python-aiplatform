@@ -39,11 +39,21 @@ def patch_client_log_batch(client, run_id, metrics=[], params=[], tags=[]):
     # pylint: disable=unused-argument
     params = {param.key: param.value for param in params}
     aiplatform.log_params(params)
+    summary_metrics = {}
+    time_series_metrics = {}
     for metric in metrics:
         if metric.step:
-            aiplatform.log_time_series_metrics({metric.key: metric.value}, metric.step)
+            if metric.step not in summary_metrics:
+                time_series_metrics[metric.step] = {metric.key:metric.value}
+            else:
+                time_series_metrics[metric.step][metric.key] = metric.value
         else:
-            aiplatform.log_metrics({metric.key: metric.value})
+            summary_metrics[metric.key] = metric.value
+    if summary_metrics:
+        aiplatform.log_metrics(summary_metrics)
+    if time_series_metrics:
+        for step, ts_metrics in time_series_metrics.items():
+            aiplatform.log_time_series_metrics(ts_metrics, step)
 
 
 def patch_client_log_metric(client, run_id, key, value, step=None, wall_time=None):
