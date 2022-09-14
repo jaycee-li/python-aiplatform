@@ -37,7 +37,6 @@ def patch_active_run():
 
 def patch_client_log_batch(client, run_id, metrics=[], params=[], tags=[]):
     # pylint: disable=unused-argument
-    aiplatform.start_run(run_id, resume=True)
     params = {param.key: param.value for param in params}
     aiplatform.log_params(params)
     for metric in metrics:
@@ -49,7 +48,6 @@ def patch_client_log_batch(client, run_id, metrics=[], params=[], tags=[]):
 
 def patch_client_log_metric(client, run_id, key, value, step=None, wall_time=None):
     # pylint: disable=unused-argument
-    aiplatform.start_run(run_id, resume=True)
     if not step:
         aiplatform.log_metrics({key: value})
     else:
@@ -58,7 +56,6 @@ def patch_client_log_metric(client, run_id, key, value, step=None, wall_time=Non
 
 def patch_client_log_param(client, run_id, key, value):
     # pylint: disable=unused-argument
-    aiplatform.start_run(run_id, resume=True)
     aiplatform.log_params({key: value})
 
 
