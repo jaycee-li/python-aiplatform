@@ -80,7 +80,6 @@ def autolog(
     import mlflow
 
     mlflow.active_run = vertex_active_run
-    mlflow.tracking.fluent._get_or_start_run = vertex_active_run
     mlflow.MlflowClient.log_batch = vertex_log_batch
     mlflow.MlflowClient.log_metric = vertex_log_metric
     mlflow.MlflowClient.log_param = vertex_log_param
