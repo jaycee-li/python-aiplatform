@@ -31,11 +31,11 @@ class VertexActiveRun:
         self.info = RunInfo()
 
 
-def vertex_active_run():
+def patch_active_run():
     return VertexActiveRun()
 
 
-def vertex_log_batch(client, run_id, metrics=[], params=[], tags=[]):
+def patch_client_log_batch(client, run_id, metrics=[], params=[], tags=[]):
     # pylint: disable=unused-argument
     aiplatform.start_run(run_id, resume=True)
     params = {param.key: param.value for param in params}
@@ -47,7 +47,7 @@ def vertex_log_batch(client, run_id, metrics=[], params=[], tags=[]):
             aiplatform.log_metrics({metric.key: metric.value})
 
 
-def vertex_log_metric(client, run_id, key, value, step=None, wall_time=None):
+def patch_client_log_metric(client, run_id, key, value, step=None, wall_time=None):
     # pylint: disable=unused-argument
     aiplatform.start_run(run_id, resume=True)
     if not step:
@@ -56,14 +56,41 @@ def vertex_log_metric(client, run_id, key, value, step=None, wall_time=None):
         aiplatform.log_time_series_metrics({key: value}, step)
 
 
-def vertex_log_param(client, run_id, key, value):
+def patch_client_log_param(client, run_id, key, value):
     # pylint: disable=unused-argument
     aiplatform.start_run(run_id, resume=True)
     aiplatform.log_params({key: value})
 
 
-def vertex_log_dict(client, run_id, dictionary, artifact_file):
+def patch_client_log_dict(client, run_id, dictionary, artifact_file):
     # pylint: disable=unused-argument
+    ## Todo: requires design for logging mlflow style artifacts
+    return
+
+
+def patch_client_log_artifacts(client, run_id, local_path, artifact_path=None):
+    # pylint: disable=unused-argument
+    ## Todo: requires design for logging mlflow style artifacts
+    return
+
+
+def patch_log_model(**kwargs):
+    # pylint: disable=unused-argument
+    ## Todo: requires design for model serialization
+    return
+
+
+def patch_log_param(key, value):
+    aiplatform.log_params({key: value})
+
+
+def patch_log_params(params):
+    aiplatform.log_params(params)
+
+
+def patch_log_artifact(local_path, artifact_path=None):
+    # pylint: disable=unused-argument
+    ## Todo: requires design for logging mlflow style artifacts
     return
 
 
@@ -79,11 +106,16 @@ def autolog(
 ) -> None:
     import mlflow
 
-    mlflow.active_run = vertex_active_run
-    mlflow.MlflowClient.log_batch = vertex_log_batch
-    mlflow.MlflowClient.log_metric = vertex_log_metric
-    mlflow.MlflowClient.log_param = vertex_log_param
-    mlflow.MlflowClient.log_dict = vertex_log_dict
+    mlflow.active_run = patch_active_run
+    mlflow.MlflowClient.log_batch = patch_client_log_batch
+    mlflow.MlflowClient.log_metric = patch_client_log_metric
+    mlflow.MlflowClient.log_param = patch_client_log_param
+    mlflow.MlflowClient.log_dict = patch_client_log_dict
+    mlflow.MlflowClient.log_artifacts = patch_client_log_artifacts
+    mlflow.models.Model.log = patch_log_model
+    mlflow.log_param = patch_log_param
+    mlflow.log_params = patch_log_params
+    mlflow.log_artifact = patch_log_artifact
 
     mlflow.autolog(
         log_input_examples=log_input_examples,
