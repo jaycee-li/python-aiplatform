@@ -64,8 +64,12 @@ def patch_client_log_dict(client, run_id, dictionary, artifact_file):
     ## Todo: requires design for logging mlflow style artifacts
     return
 
+def patch_client_log_artifact(client, run_id, local_path, artifact_path=None):
+    # pylint: disable=unused-argument
+    ## Todo: requires design for logging mlflow style artifacts
+    return
 
-def patch_client_log_artifacts(client, run_id, local_path, artifact_path=None):
+def patch_client_log_artifacts(client, run_id, local_dir, artifact_path=None):
     # pylint: disable=unused-argument
     ## Todo: requires design for logging mlflow style artifacts
     return
@@ -77,21 +81,7 @@ def patch_log_model(**kwargs):
     return
 
 
-def patch_log_param(key, value):
-    aiplatform.log_params({key: value})
-
-
-def patch_log_params(params):
-    aiplatform.log_params(params)
-
-
-def patch_log_artifact(local_path, artifact_path=None):
-    # pylint: disable=unused-argument
-    ## Todo: requires design for logging mlflow style artifacts
-    return
-
-
-def autolog(
+def vertex_autolog(
     log_input_examples: bool = False,
     log_model_signatures: bool = True,
     log_models: bool = True,
@@ -110,9 +100,6 @@ def autolog(
     mlflow.MlflowClient.log_dict = patch_client_log_dict
     mlflow.MlflowClient.log_artifacts = patch_client_log_artifacts
     mlflow.models.Model.log = patch_log_model
-    mlflow.log_param = patch_log_param
-    mlflow.log_params = patch_log_params
-    mlflow.log_artifact = patch_log_artifact
 
     mlflow.autolog(
         log_input_examples=log_input_examples,
