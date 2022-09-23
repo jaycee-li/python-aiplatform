@@ -39,7 +39,7 @@ from google.cloud.aiplatform.metadata import experiment_resources
 from google.cloud.aiplatform.metadata import metadata
 from google.cloud.aiplatform.metadata import resource
 from google.cloud.aiplatform.metadata import utils as metadata_utils
-from google.cloud.aiplatform.metadata.schema.system import artifact_schema
+from google.cloud.aiplatform.metadata import schema
 from google.cloud.aiplatform.tensorboard import tensorboard_resource
 from google.cloud.aiplatform.utils import rest_utils
 
@@ -994,27 +994,28 @@ class ExperimentRun(
     def log_classification_metrics(
         self,
         *,
-        display_name: Optional[str] = None,
         labels: Optional[List[str]] = None,
         matrix: Optional[List[List[int]]] = None,
         fpr: Optional[List[float]] = None,
         tpr: Optional[List[float]] = None,
         threshold: Optional[List[float]] = None,
+        display_name: Optional[str] = None,
     ):
-        """Log metrics for classification models. Currently support confusion matrix and ROC curve.
+        """Create an artifact for classification metrics and log to ExperimentRun. Currently support confusion matrix and ROC curve.
 
         ```
         my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
         my_run.log_classification_metrics(
-            display_name='my_confusion_matrix',
+            display_name='my_classification_metrics',
             labels=['cat', 'dog'],
-            matrix=[[9, 1], [1,9]]
+            matrix=[[9, 1], [1, 9]],
+            fpr=[0.1, 0.7, 0.9],
+            tpr=[0.1, 0.5, 0.9],
+            threshold=[0.9, 0.5, 0.1],
         )
         ```
 
         Args:
-            display_name (str):
-                Optional. The user-defined name for the metrics.
             labels (List[str]):
                 Optional. List of label names for the confusion matrix. Must be set if 'matrix' is set.
             matrix (List[List[int]):
@@ -1025,6 +1026,8 @@ class ExperimentRun(
                 Optional. List of true positive rates for the ROC curve. Must be set if 'fpr' or 'thresholds' is set.
             threshold (List[float]):
                 Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
+            display_name (str):
+                Optional. The user-defined name for the classification metric artifact.
         """
         if (labels or matrix) and not (labels and matrix):
             raise ValueError("labels and matrix must be set together.")
@@ -1032,33 +1035,33 @@ class ExperimentRun(
         if (fpr or tpr or threshold) and not (fpr and tpr and threshold):
             raise ValueError("fpr, tpr, and thresholds must be set together.")
 
-        if len(matrix) != len(labels):
-            raise ValueError(
-                "Length of labels and matrix must be the same. "
-                "Got lengths {} and {} respectively.".format(len(labels), len(matrix))
-            )
-
-        if (
-            len(fpr) != len(tpr)
-            or len(fpr) != len(threshold)
-            or len(tpr) != len(threshold)
-        ):
-            raise ValueError(
-                "Length of fpr, tpr and threshold must be the same. "
-                "Got lengths {}, {} and {} respectively.".format(
-                    len(fpr), len(tpr), len(threshold)
-                )
-            )
-
         metadata = {}
         if labels and matrix:
+            if len(matrix) != len(labels):
+                raise ValueError(
+                    "Length of labels and matrix must be the same. "
+                    "Got lengths {} and {} respectively.".format(len(labels), len(matrix))
+                )
+
             confusion_matrix = {
                 "annotationSpecs": [{"displayName": label} for label in labels],
-                "rows": [{"row": row} for row in matrix],
+                "rows": matrix,
             }
             metadata["confusionMatrix"] = confusion_matrix
 
         if fpr and tpr and threshold:
+            if (
+                len(fpr) != len(tpr)
+                or len(fpr) != len(threshold)
+                or len(tpr) != len(threshold)
+            ):
+                raise ValueError(
+                    "Length of fpr, tpr and threshold must be the same. "
+                    "Got lengths {}, {} and {} respectively.".format(
+                        len(fpr), len(tpr), len(threshold)
+                    )
+                )
+
             metadata["confidenceMetrics"] = [
                 {
                     "confidenceThreshold": threshold[i],
@@ -1068,7 +1071,7 @@ class ExperimentRun(
                 for i in range(len(fpr))
             ]
 
-        classification_metrics = artifact_schema.ClassificationMetrics(
+        classification_metrics = schema.google.artifact_schema.ClassificationMetrics(
             display_name=display_name,
             metadata=metadata,
         )
@@ -1239,6 +1242,22 @@ class ExperimentRun(
     def get_classification_metrics(self) -> List[Dict[str, Union[str, List]]]:
         """Get the classification metrics logged to this run.
 
+        ```
+        my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
+        metric = my_run.get_classification_metrics()[0]
+        print(metric)
+        ## print result:
+            {
+                "id": "e6c893a4-222e-4c60-a028-6a3b95dfc109",
+                "display_name": "my-classification-metrics",
+                "labels": ["True", "False"],
+                "matrix": [[9,1], [1,9]],
+                "fpr": [0.1, 0.5, 0.9],
+                "tpr": [0.1, 0.7, 0.9],
+                "thresholds": [0.9, 0.5, 0.1]
+            }
+        ```
+        
         Returns:
             Classification metrics logged to this experiment run.
         """
@@ -1246,7 +1265,7 @@ class ExperimentRun(
         artifact_list = artifact.Artifact.list(
             filter=metadata_utils._make_filter_string(
                 in_context=[self.resource_name],
-                schema_title="system.ClassificationMetrics",
+                schema_title="google.ClassificationMetrics",
             ),
             project=self.project,
             location=self.location,
@@ -1264,9 +1283,8 @@ class ExperimentRun(
                     d["displayName"]
                     for d in metadata["confusionMatrix"]["annotationSpecs"]
                 ]
-                metric["matrix"] = [
-                    d["row"] for d in metadata["confusionMatrix"]["rows"]
-                ]
+                metric["matrix"] = metadata["confusionMatrix"]["rows"]
+                
             if "confidenceMetrics" in metadata:
                 metric["fpr"] = [
                     d["falsePositiveRate"] for d in metadata["confidenceMetrics"]
