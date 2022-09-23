@@ -373,18 +373,28 @@ class _ExperimentTracker:
     def log_classification_metrics(
         self,
         *,
-        display_name: Optional[str] = None,
         labels: Optional[List[str]] = None,
         matrix: Optional[List[List[int]]] = None,
         fpr: Optional[List[float]] = None,
         tpr: Optional[List[float]] = None,
         threshold: Optional[List[float]] = None,
+        display_name: Optional[str] = None,
     ):
-        """Log metrics for classification models. Currently support confusion matrix and ROC curve.
+        """Create an artifact for classification metrics and log to ExperimentRun. Currently support confusion matrix and ROC curve.
+
+        ```
+        my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
+        my_run.log_classification_metrics(
+            display_name='my-classification-metrics',
+            labels=['cat', 'dog'],
+            matrix=[[9, 1], [1, 9]],
+            fpr=[0.1, 0.5, 0.9],
+            tpr=[0.1, 0.7, 0.9],
+            threshold=[0.9, 0.5, 0.1],
+        )
+        ```
 
         Args:
-            display_name (str):
-                Optional. The user-defined name for the metrics.
             labels (List[str]):
                 Optional. List of label names for the confusion matrix. Must be set if 'matrix' is set.
             matrix (List[List[int]):
@@ -395,6 +405,14 @@ class _ExperimentTracker:
                 Optional. List of true positive rates for the ROC curve. Must be set if 'fpr' or 'thresholds' is set.
             threshold (List[float]):
                 Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
+            display_name (str):
+                Optional. The user-defined name for the classification metric artifact.
+
+        Raises:
+            ValueError: if 'labels' and 'matrix' are not set together
+                        or if 'labels' and 'matrix' are not in the same length
+                        or if 'fpr' and 'tpr' and 'threshold' are not set together
+                        or if 'fpr' and 'tpr' and 'threshold' are not in the same length
         """
 
         self._validate_experiment_and_run(method_name="log_classification_metrics")

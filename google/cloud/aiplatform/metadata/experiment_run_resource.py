@@ -1006,11 +1006,11 @@ class ExperimentRun(
         ```
         my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
         my_run.log_classification_metrics(
-            display_name='my_classification_metrics',
+            display_name='my-classification-metrics',
             labels=['cat', 'dog'],
             matrix=[[9, 1], [1, 9]],
-            fpr=[0.1, 0.7, 0.9],
-            tpr=[0.1, 0.5, 0.9],
+            fpr=[0.1, 0.5, 0.9],
+            tpr=[0.1, 0.7, 0.9],
             threshold=[0.9, 0.5, 0.1],
         )
         ```
@@ -1028,6 +1028,12 @@ class ExperimentRun(
                 Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
             display_name (str):
                 Optional. The user-defined name for the classification metric artifact.
+
+        Raises:
+            ValueError: if 'labels' and 'matrix' are not set together
+                        or if 'labels' and 'matrix' are not in the same length
+                        or if 'fpr' and 'tpr' and 'threshold' are not set together
+                        or if 'fpr' and 'tpr' and 'threshold' are not in the same length
         """
         if (labels or matrix) and not (labels and matrix):
             raise ValueError("labels and matrix must be set together.")
@@ -1040,7 +1046,9 @@ class ExperimentRun(
             if len(matrix) != len(labels):
                 raise ValueError(
                     "Length of labels and matrix must be the same. "
-                    "Got lengths {} and {} respectively.".format(len(labels), len(matrix))
+                    "Got lengths {} and {} respectively.".format(
+                        len(labels), len(matrix)
+                    )
                 )
 
             confusion_matrix = {
@@ -1240,7 +1248,7 @@ class ExperimentRun(
             return self._metadata_node.metadata[constants._METRIC_KEY]
 
     def get_classification_metrics(self) -> List[Dict[str, Union[str, List]]]:
-        """Get the classification metrics logged to this run.
+        """Get all the classification metrics logged to this run.
 
         ```
         my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
@@ -1250,16 +1258,16 @@ class ExperimentRun(
             {
                 "id": "e6c893a4-222e-4c60-a028-6a3b95dfc109",
                 "display_name": "my-classification-metrics",
-                "labels": ["True", "False"],
+                "labels": ["cat", "dog"],
                 "matrix": [[9,1], [1,9]],
                 "fpr": [0.1, 0.5, 0.9],
                 "tpr": [0.1, 0.7, 0.9],
                 "thresholds": [0.9, 0.5, 0.1]
             }
         ```
-        
+
         Returns:
-            Classification metrics logged to this experiment run.
+            List of classification metrics logged to this experiment run.
         """
 
         artifact_list = artifact.Artifact.list(
@@ -1284,7 +1292,7 @@ class ExperimentRun(
                     for d in metadata["confusionMatrix"]["annotationSpecs"]
                 ]
                 metric["matrix"] = metadata["confusionMatrix"]["rows"]
-                
+
             if "confidenceMetrics" in metadata:
                 metric["fpr"] = [
                     d["falsePositiveRate"] for d in metadata["confidenceMetrics"]

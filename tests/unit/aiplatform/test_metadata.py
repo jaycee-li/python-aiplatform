@@ -125,11 +125,11 @@ _TEST_OTHER_METRICS = {_TEST_METRIC_KEY_2: 0.9}
 
 # classification_metrics
 _TEST_CLASSIFICATION_METRICS = {
-    "display_name": "classification_metrics",
-    "labels": ["True", "False"],
+    "display_name": "my-classification-metrics",
+    "labels": ["cat", "dog"],
     "matrix": [[1, 9], [9, 1]],
-    "fpr": [0.1, 0.7, 0.9],
-    "tpr": [0.1, 0.5, 0.9],
+    "fpr": [0.1, 0.5, 0.9],
+    "tpr": [0.1, 0.7, 0.9],
     "threshold": [0.9, 0.5, 0.1],
 }
 

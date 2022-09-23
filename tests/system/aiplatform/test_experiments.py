@@ -39,10 +39,10 @@ _TIME_SERIES_METRIC_KEY = "accuracy"
 
 _CLASSIFICATION_METRICS = {
     "display_name": "my-classification-metrics",
-    "labels": ["True", "False"],
-    "matrix": [[10, 2], [2, 10]],
-    "fpr": [0.0, 0.5, 1.0],
-    "tpr": [0.0, 0.7, 1.0],
+    "labels": ["cat", "dog"],
+    "matrix": [[9, 1], [1, 9]],
+    "fpr": [0.1, 0.5, 0.9],
+    "tpr": [0.1, 0.7, 0.9],
     "threshold": [0.9, 0.5, 0.1],
 }
 
