@@ -127,7 +127,7 @@ _TEST_OTHER_METRICS = {_TEST_METRIC_KEY_2: 0.9}
 _TEST_CLASSIFICATION_METRICS = {
     "display_name": "my-classification-metrics",
     "labels": ["cat", "dog"],
-    "matrix": [[1, 9], [9, 1]],
+    "matrix": [[9, 1], [1, 9]],
     "fpr": [0.1, 0.5, 0.9],
     "tpr": [0.1, 0.7, 0.9],
     "threshold": [0.9, 0.5, 0.1],
@@ -420,8 +420,8 @@ def query_execution_inputs_and_outputs_mock():
 
 _TEST_CLASSIFICATION_METRICS_METADATA = {
     "confusionMatrix": {
-        "annotationSpecs": [{"displayName": "True"}, {"displayName": "False"}],
-        "rows": [{"row": [1, 9]}, {"row": [9, 1]}],
+        "annotationSpecs": [{"displayName": "cat"}, {"displayName": "dog"}],
+        "rows": [{"row": [9, 1]}, {"row": [1, 9]}],
     },
     "confidenceMetrics": [
         {"confidenceThreshold": 0.9, "recall": 0.1, "falsePositiveRate": 0.1},
