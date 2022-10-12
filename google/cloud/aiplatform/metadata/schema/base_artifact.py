@@ -178,3 +178,6 @@ class BaseArtifactSchema(artifact.Artifact):
         # Reinstantiate this class using the newly created resource.
         self._init_with_resource_name(artifact_name=new_artifact_instance.resource_name)
         return self
+
+    def __repr__(self) -> str:
+        return f"{object.__repr__(self)}\nschema_title: {self.schema_title}"
