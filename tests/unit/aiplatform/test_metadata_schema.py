@@ -64,7 +64,7 @@ _TEST_SCHEMA_VERSION = "0.0.1"
 _TEST_DESCRIPTION = "test description"
 _TEST_METADATA = {"test-param1": 1, "test-param2": "test-value", "test-param3": True}
 _TEST_UPDATED_METADATA = {
-    "test-param1": 2,
+    "test-param1": 2.0,
     "test-param2": "test-value-1",
     "test-param3": False,
 }
@@ -223,6 +223,44 @@ class TestMetadataBaseArtifactSchema:
         artifact = TestArtifact()
         assert artifact.schema_title == _TEST_SCHEMA_TITLE
 
+    def test_base_class_print_output(self, capsys):
+        class TestArtifact(base_artifact.BaseArtifactSchema):
+            schema_title = _TEST_SCHEMA_TITLE
+
+        artifact = TestArtifact()
+        print(artifact)
+        captured = capsys.readouterr()
+        assert (
+            captured.out
+            == f"{object.__repr__(artifact)}\n"
+            + f"schema_title: {_TEST_SCHEMA_TITLE}\n"
+        )
+
+    def test_base_class_inherited_methods_error(self):
+        class TestArtifact(base_artifact.BaseArtifactSchema):
+            schema_title = _TEST_SCHEMA_TITLE
+
+        artifact = TestArtifact()
+
+        with pytest.raises(RuntimeError) as exception:
+            artifact.resource_name
+        assert str(exception.value) == "TestArtifact resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            artifact.lineage_console_uri
+        assert str(exception.value) == "TestArtifact resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            artifact.sync_resource()
+        assert str(exception.value) == "TestArtifact resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            artifact.update(
+                metadata=_TEST_UPDATED_METADATA,
+                description=_TEST_DESCRIPTION,
+            )
+        assert str(exception.value) == "TestArtifact resource has not been created."
+
     def test_base_class_parameters_overrides_default_values(self):
         class TestArtifact(base_artifact.BaseArtifactSchema):
             schema_title = _TEST_SCHEMA_TITLE
@@ -348,6 +386,53 @@ class TestMetadataBaseExecutionSchema:
 
         execution = TestExecution()
         assert execution.schema_title == _TEST_SCHEMA_TITLE
+
+    def test_base_class_print_output(self, capsys):
+        class TestExecution(base_execution.BaseExecutionSchema):
+            schema_title = _TEST_SCHEMA_TITLE
+
+        execution = TestExecution()
+        print(execution)
+        captured = capsys.readouterr()
+        assert (
+            captured.out
+            == f"{object.__repr__(execution)}\n"
+            + f"schema_title: {_TEST_SCHEMA_TITLE}\n"
+        )
+
+    def test_base_class_inherited_methods_error(self):
+        class TestExecution(base_execution.BaseExecutionSchema):
+            schema_title = _TEST_SCHEMA_TITLE
+
+        execution = TestExecution()
+
+        with pytest.raises(RuntimeError) as exception:
+            execution.resource_name
+        assert str(exception.value) == "TestExecution resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            execution.assign_input_artifacts(artifacts=[_TEST_ARTIFACT_NAME])
+        assert str(exception.value) == "TestExecution resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            execution.assign_output_artifacts(artifacts=[_TEST_ARTIFACT_NAME])
+        assert str(exception.value) == "TestExecution resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            execution.get_input_artifacts()
+        assert str(exception.value) == "TestExecution resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            execution.get_output_artifacts()
+        assert str(exception.value) == "TestExecution resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            execution.update(
+                state=_TEST_EXECUTION_STATE,
+                description=_TEST_DESCRIPTION,
+                metadata=_TEST_UPDATED_METADATA,
+            )
+        assert str(exception.value) == "TestExecution resource has not been created."
 
     def test_base_class_parameters_overrides_default_values(self):
         class TestExecution(base_execution.BaseExecutionSchema):
@@ -495,6 +580,52 @@ class TestMetadataBaseContextSchema:
 
         context = TestContext()
         assert context.schema_title == _TEST_SCHEMA_TITLE
+
+    def test_base_class_print_output(self, capsys):
+        class TestContext(base_context.BaseContextSchema):
+            schema_title = _TEST_SCHEMA_TITLE
+
+        context = TestContext()
+        print(context)
+        captured = capsys.readouterr()
+        assert (
+            captured.out
+            == f"{object.__repr__(context)}\n" + f"schema_title: {_TEST_SCHEMA_TITLE}\n"
+        )
+
+    def test_base_class_inherited_methods_error(self):
+        class TestContext(base_context.BaseContextSchema):
+            schema_title = _TEST_SCHEMA_TITLE
+
+        context = TestContext()
+
+        with pytest.raises(RuntimeError) as exception:
+            context.resource_name
+        assert str(exception.value) == "TestContext resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            context.add_artifacts_and_executions(
+                artifact_resource_names=[_TEST_ARTIFACT_NAME],
+            )
+        assert str(exception.value) == "TestContext resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            context.get_artifacts()
+        assert str(exception.value) == "TestContext resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            context.add_context_children(
+                contexts=[_TEST_CONTEXT_NAME],
+            )
+        assert str(exception.value) == "TestContext resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            context.query_lineage_subgraph()
+        assert str(exception.value) == "TestContext resource has not been created."
+
+        with pytest.raises(RuntimeError) as exception:
+            context.get_executions()
+        assert str(exception.value) == "TestContext resource has not been created."
 
     def test_base_context_class_parameters_overrides_default_values(self):
         class TestContext(base_context.BaseContextSchema):
@@ -748,14 +879,46 @@ class TestMetadataGoogleArtifactSchema:
         assert artifact.schema_title == "google.ClassificationMetrics"
 
     def test_classification_metrics_constructor_parameters_are_set_correctly(self):
+        aggregation_type = "MACRO_AVERAGE"
+        aggregation_threshold = 0.5
+        recall = 0.5
+        precision = 0.5
+        f1_score = 0.5
+        accuracy = 0.5
         au_prc = 1.0
         au_roc = 2.0
         log_loss = 0.5
+        confusion_matrix = utils.ConfusionMatrix(
+            matrix=[[9.0, 1.0], [1.0, 9.0]],
+            annotation_specs=[
+                utils.AnnotationSpec(display_name="cat"),
+                utils.AnnotationSpec(display_name="dog"),
+            ],
+        )
+        confidence_metrics = [
+            utils.ConfidenceMetric(
+                confidence_threshold=0.9, recall=0.1, false_positive_rate=0.1
+            ),
+            utils.ConfidenceMetric(
+                confidence_threshold=0.5, recall=0.5, false_positive_rate=0.7
+            ),
+            utils.ConfidenceMetric(
+                confidence_threshold=0.1, recall=0.9, false_positive_rate=0.9
+            ),
+        ]
 
         artifact = google_artifact_schema.ClassificationMetrics(
+            aggregation_type=aggregation_type,
+            aggregation_threshold=aggregation_threshold,
+            recall=recall,
+            precision=precision,
+            f1_score=f1_score,
+            accuracy=accuracy,
             au_prc=au_prc,
             au_roc=au_roc,
             log_loss=log_loss,
+            confusion_matrix=confusion_matrix,
+            confidence_metrics=confidence_metrics,
             artifact_id=_TEST_ARTIFACT_ID,
             uri=_TEST_URI,
             display_name=_TEST_DISPLAY_NAME,
@@ -764,12 +927,22 @@ class TestMetadataGoogleArtifactSchema:
             metadata=_TEST_UPDATED_METADATA,
         )
         expected_metadata = {
-            "test-param1": 2.0,
-            "test-param2": "test-value-1",
-            "test-param3": False,
-            "auPrc": 1.0,
-            "auRoc": 2.0,
-            "logLoss": 0.5,
+            "test-param1": _TEST_UPDATED_METADATA["test-param1"],
+            "test-param2": _TEST_UPDATED_METADATA["test-param2"],
+            "test-param3": _TEST_UPDATED_METADATA["test-param3"],
+            "aggregationType": aggregation_type,
+            "aggregationThreshold": aggregation_threshold,
+            "recall": recall,
+            "precision": precision,
+            "f1Score": f1_score,
+            "accuracy": accuracy,
+            "auPrc": au_prc,
+            "auRoc": au_roc,
+            "logLoss": log_loss,
+            "confusionMatrix": confusion_matrix.to_dict(),
+            "confidenceMetrics": [
+                confidence_metric.to_dict() for confidence_metric in confidence_metrics
+            ],
         }
 
         assert artifact.artifact_id == _TEST_ARTIFACT_ID

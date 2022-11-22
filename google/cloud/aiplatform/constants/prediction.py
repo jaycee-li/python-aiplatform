@@ -79,6 +79,12 @@ SKLEARN_CONTAINER_URIS = [
 ]
 
 TF_CONTAINER_URIS = [
+    "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-10:latest",
+    "europe-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-10:latest",
+    "asia-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-10:latest",
+    "us-docker.pkg.dev/vertex-ai/prediction/tf2-gpu.2-10:latest",
+    "europe-docker.pkg.dev/vertex-ai/prediction/tf2-gpu.2-10:latest",
+    "asia-docker.pkg.dev/vertex-ai/prediction/tf2-gpu.2-10:latest",
     "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-9:latest",
     "europe-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-9:latest",
     "asia-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-9:latest",
@@ -176,6 +182,7 @@ DEFAULT_LOCAL_RUN_GPU_CAPABILITIES = [["utility", "compute"]]
 DEFAULT_LOCAL_RUN_GPU_COUNT = -1
 
 CUSTOM_PREDICTION_ROUTINES = "custom-prediction-routines"
+CUSTOM_PREDICTION_ROUTINES_SERVER_ERROR_HEADER_KEY = "X-AIP-CPR-SYSTEM-ERROR"
 
 # Headers' related constants for the handler usage.
 CONTENT_TYPE_HEADER_REGEX = re.compile("^[Cc]ontent-?[Tt]ype$")

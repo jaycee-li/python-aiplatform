@@ -360,6 +360,8 @@ from .metadata_service import (
     QueryArtifactLineageSubgraphRequest,
     QueryContextLineageSubgraphRequest,
     QueryExecutionInputsAndOutputsRequest,
+    RemoveContextChildrenRequest,
+    RemoveContextChildrenResponse,
     UpdateArtifactRequest,
     UpdateContextRequest,
     UpdateExecutionRequest,
@@ -382,6 +384,7 @@ from .migration_service import (
 from .model import (
     Model,
     ModelContainerSpec,
+    ModelSourceInfo,
     Port,
     PredictSchemata,
 )
@@ -867,6 +870,8 @@ __all__ = (
     "QueryArtifactLineageSubgraphRequest",
     "QueryContextLineageSubgraphRequest",
     "QueryExecutionInputsAndOutputsRequest",
+    "RemoveContextChildrenRequest",
+    "RemoveContextChildrenResponse",
     "UpdateArtifactRequest",
     "UpdateContextRequest",
     "UpdateExecutionRequest",
@@ -881,6 +886,7 @@ __all__ = (
     "SearchMigratableResourcesResponse",
     "Model",
     "ModelContainerSpec",
+    "ModelSourceInfo",
     "Port",
     "PredictSchemata",
     "ModelDeploymentMonitoringBigQueryTable",

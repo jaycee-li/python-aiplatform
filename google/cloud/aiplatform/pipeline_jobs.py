@@ -57,6 +57,9 @@ _VALID_NAME_PATTERN = pipeline_constants._VALID_NAME_PATTERN
 # Pattern for an Artifact Registry URL.
 _VALID_AR_URL = pipeline_constants._VALID_AR_URL
 
+# Pattern for any JSON or YAML file over HTTPS.
+_VALID_HTTPS_URL = pipeline_constants._VALID_HTTPS_URL
+
 _READ_MASK_FIELDS = pipeline_constants._READ_MASK_FIELDS
 
 
@@ -131,8 +134,8 @@ class PipelineJob(
             template_path (str):
                 Required. The path of PipelineJob or PipelineSpec JSON or YAML file. It
                 can be a local path, a Google Cloud Storage URI (e.g. "gs://project.name"),
-                or an Artifact Registry URI (e.g.
-                "https://us-central1-kfp.pkg.dev/proj/repo/pack/latest").
+                an Artifact Registry URI (e.g.
+                "https://us-central1-kfp.pkg.dev/proj/repo/pack/latest"), or an HTTPS URI.
             job_id (str):
                 Optional. The unique ID of the job run.
                 If not specified, pipeline name + timestamp will be used.
@@ -277,12 +280,11 @@ class PipelineJob(
             ),
         }
 
-        if _VALID_AR_URL.match(template_path):
+        if _VALID_AR_URL.match(template_path) or _VALID_HTTPS_URL.match(template_path):
             pipeline_job_args["template_uri"] = template_path
 
         self._gca_resource = gca_pipeline_job.PipelineJob(**pipeline_job_args)
 
-    @base.optional_sync()
     def run(
         self,
         service_account: Optional[str] = None,
@@ -299,9 +301,42 @@ class PipelineJob(
             network (str):
                 Optional. The full name of the Compute Engine network to which the job
                 should be peered. For example, projects/12345/global/networks/myVPC.
-
                 Private services access must already be configured for the network.
-                If left unspecified, the job is not peered with any network.
+                If left unspecified, the network set in aiplatform.init will be used.
+                Otherwise, the job is not peered with any network.
+            sync (bool):
+                Optional. Whether to execute this method synchronously. If False, this method will unblock and it will be executed in a concurrent Future.
+            create_request_timeout (float):
+                Optional. The timeout for the create request in seconds.
+        """
+        network = network or initializer.global_config.network
+
+        self._run(
+            service_account=service_account,
+            network=network,
+            sync=sync,
+            create_request_timeout=create_request_timeout,
+        )
+
+    @base.optional_sync()
+    def _run(
+        self,
+        service_account: Optional[str] = None,
+        network: Optional[str] = None,
+        sync: Optional[bool] = True,
+        create_request_timeout: Optional[float] = None,
+    ) -> None:
+        """Helper method to ensure network synchronization and to run
+        the configured PipelineJob and monitor the job until completion.
+
+        Args:
+            service_account (str):
+                Optional. Specifies the service account for workload run-as account.
+                Users submitting jobs must have act-as permission on this run-as account.
+            network (str):
+                Optional. The full name of the Compute Engine network to which the job
+                should be peered. For example, projects/12345/global/networks/myVPC.
+                Private services access must already be configured for the network.
             sync (bool):
                 Optional. Whether to execute this method synchronously. If False, this method will unblock and it will be executed in a concurrent Future.
             create_request_timeout (float):
@@ -334,7 +369,8 @@ class PipelineJob(
                 should be peered. For example, projects/12345/global/networks/myVPC.
 
                 Private services access must already be configured for the network.
-                If left unspecified, the job is not peered with any network.
+                If left unspecified, the network set in aiplatform.init will be used.
+                Otherwise, the job is not peered with any network.
             create_request_timeout (float):
                 Optional. The timeout for the create request in seconds.
             experiment (Union[str, experiments_resource.Experiment]):
@@ -346,6 +382,8 @@ class PipelineJob(
                 Pipeline parameters will be associated as parameters to the
                 current Experiment Run.
         """
+        network = network or initializer.global_config.network
+
         if service_account:
             self._gca_resource.service_account = service_account
 
@@ -512,7 +550,7 @@ class PipelineJob(
         cls,
         filter: Optional[str] = None,
         order_by: Optional[str] = None,
-        enable_simple_view: Optional[bool] = False,
+        enable_simple_view: bool = False,
         project: Optional[str] = None,
         location: Optional[str] = None,
         credentials: Optional[auth_credentials.Credentials] = None,
@@ -536,10 +574,10 @@ class PipelineJob(
                 Supported fields: `display_name`, `create_time`, `update_time`
             enable_simple_view (bool):
                 Optional. Whether to pass the `read_mask` parameter to the list call.
-                This will improve the performance of calling list(). However, the
-                returned PipelineJob list will not include all fields for each PipelineJob.
-                Setting this to True will exclude the following fields in your response:
-                `runtime_config`, `service_account`, `network`, and some subfields of
+                Defaults to False if not provided. This will improve the performance of calling
+                list(). However, the returned PipelineJob list will not include all fields for
+                each PipelineJob. Setting this to True will exclude the following fields in your
+                response: `runtime_config`, `service_account`, `network`, and some subfields of
                 `pipeline_spec` and `job_detail`. The following fields will be included in
                 each PipelineJob resource in your response: `state`, `display_name`,
                 `pipeline_spec.pipeline_info`, `create_time`, `start_time`, `end_time`,
