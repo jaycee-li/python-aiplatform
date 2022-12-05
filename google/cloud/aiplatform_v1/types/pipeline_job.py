@@ -49,7 +49,7 @@ class PipelineJob(proto.Message):
         display_name (str):
             The display name of the Pipeline.
             The name can be up to 128 characters long and
-            can be consist of any UTF-8 characters.
+            can consist of any UTF-8 characters.
         create_time (google.protobuf.timestamp_pb2.Timestamp):
             Output only. Pipeline creation time.
         start_time (google.protobuf.timestamp_pb2.Timestamp):
@@ -108,9 +108,9 @@ class PipelineJob(proto.Message):
 
             Private services access must already be configured for the
             network. Pipeline job will apply the network configuration
-            to the GCP resources being launched, if applied, such as
-            Vertex AI Training or Dataflow job. If left unspecified, the
-            workload is not peered with any network.
+            to the Google Cloud resources being launched, if applied,
+            such as Vertex AI Training or Dataflow job. If left
+            unspecified, the workload is not peered with any network.
         template_uri (str):
             A template uri from where the
             [PipelineJob.pipeline_spec][google.cloud.aiplatform.v1.PipelineJob.pipeline_spec],
@@ -177,8 +177,8 @@ class PipelineJob(proto.Message):
             Attributes:
                 artifact_id (str):
                     Artifact resource id from MLMD. Which is the last portion of
-                    an artifact resource
-                    name(projects/{project}/locations/{location}/metadataStores/default/artifacts/{artifact_id}).
+                    an artifact resource name:
+                    ``projects/{project}/locations/{location}/metadataStores/default/artifacts/{artifact_id}``.
                     The artifact must stay within the same project, location and
                     default metadatastore as the pipeline.
 
@@ -565,6 +565,20 @@ class PipelineTaskExecutorDetail(proto.Message):
                 [PipelineJob.pipeline_spec][google.cloud.aiplatform.v1.PipelineJob.pipeline_spec]
                 specifies the ``pre_caching_check`` hook in the lifecycle
                 events.
+            failed_main_jobs (Sequence[str]):
+                Output only. The names of the previously failed
+                [CustomJob][google.cloud.aiplatform.v1.CustomJob] for the
+                main container executions. The list includes the all
+                attempts in chronological order.
+            failed_pre_caching_check_jobs (Sequence[str]):
+                Output only. The names of the previously failed
+                [CustomJob][google.cloud.aiplatform.v1.CustomJob] for the
+                pre-caching-check container executions. This job will be
+                available if the
+                [PipelineJob.pipeline_spec][google.cloud.aiplatform.v1.PipelineJob.pipeline_spec]
+                specifies the ``pre_caching_check`` hook in the lifecycle
+                events. The list includes the all attempts in chronological
+                order.
         """
 
         main_job = proto.Field(
@@ -574,6 +588,14 @@ class PipelineTaskExecutorDetail(proto.Message):
         pre_caching_check_job = proto.Field(
             proto.STRING,
             number=2,
+        )
+        failed_main_jobs = proto.RepeatedField(
+            proto.STRING,
+            number=3,
+        )
+        failed_pre_caching_check_jobs = proto.RepeatedField(
+            proto.STRING,
+            number=4,
         )
 
     class CustomJobDetail(proto.Message):

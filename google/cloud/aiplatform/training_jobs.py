@@ -25,6 +25,7 @@ from google.auth import credentials as auth_credentials
 from google.cloud.aiplatform import base
 from google.cloud.aiplatform.constants import base as constants
 from google.cloud.aiplatform import datasets
+from google.cloud.aiplatform import explain
 from google.cloud.aiplatform import initializer
 from google.cloud.aiplatform import models
 from google.cloud.aiplatform import jobs
@@ -32,17 +33,21 @@ from google.cloud.aiplatform import schema
 from google.cloud.aiplatform import utils
 from google.cloud.aiplatform.utils import console_utils
 
+from google.cloud.aiplatform.compat.types import env_var as gca_env_var
+from google.cloud.aiplatform.compat.types import io as gca_io
+from google.cloud.aiplatform.compat.types import model as gca_model
 from google.cloud.aiplatform.compat.types import (
-    env_var as gca_env_var,
-    io as gca_io,
-    model as gca_model,
     pipeline_state as gca_pipeline_state,
+)
+from google.cloud.aiplatform.compat.types import (
     training_pipeline as gca_training_pipeline,
 )
+
 from google.cloud.aiplatform.utils import _timestamped_gcs_dir
 from google.cloud.aiplatform.utils import source_utils
 from google.cloud.aiplatform.utils import worker_spec_utils
 from google.cloud.aiplatform.utils import column_transformations_utils
+from google.cloud.aiplatform.utils import _explanation_utils
 
 from google.cloud.aiplatform.v1.schema.trainingjob import (
     definition_v1 as training_job_inputs,
@@ -1093,6 +1098,8 @@ class _CustomTrainingJob(_TrainingJob):
         model_instance_schema_uri: Optional[str] = None,
         model_parameters_schema_uri: Optional[str] = None,
         model_prediction_schema_uri: Optional[str] = None,
+        explanation_metadata: Optional[explain.ExplanationMetadata] = None,
+        explanation_parameters: Optional[explain.ExplanationParameters] = None,
         project: Optional[str] = None,
         location: Optional[str] = None,
         credentials: Optional[auth_credentials.Credentials] = None,
@@ -1194,6 +1201,15 @@ class _CustomTrainingJob(_TrainingJob):
                 and probably different, including the URI scheme, than the
                 one given on input. The output URI will point to a location
                 where the user only has a read access.
+            explanation_metadata (explain.ExplanationMetadata):
+                Optional. Metadata describing the Model's input and output for
+                explanation. `explanation_metadata` is optional while
+                `explanation_parameters` must be specified when used.
+                For more details, see `Ref docs <http://tinyurl.com/1igh60kt>`
+            explanation_parameters (explain.ExplanationParameters):
+                Optional. Parameters to configure explaining for Model's
+                predictions.
+                For more details, see `Ref docs <http://tinyurl.com/1an4zake>`
             project (str):
                 Project to run training in. Overrides project set in aiplatform.init.
             location (str):
@@ -1311,6 +1327,10 @@ class _CustomTrainingJob(_TrainingJob):
                 "staging_bucket should be set in TrainingJob constructor or "
                 "set using aiplatform.init(staging_bucket='gs://my-bucket')"
             )
+
+        # Save explanationSpec as instance attributes
+        self._explanation_metadata = explanation_metadata
+        self._explanation_parameters = explanation_parameters
 
         # Backing Custom Job resource is not known until after data preprocessing
         # once Custom Job is known we log the console uri and the tensorboard uri
@@ -1439,6 +1459,12 @@ class _CustomTrainingJob(_TrainingJob):
                 managed_model.labels = model_labels
             else:
                 managed_model.labels = self._labels
+            managed_model.explanation_spec = (
+                _explanation_utils.create_and_validate_explanation_spec(
+                    explanation_metadata=self._explanation_metadata,
+                    explanation_parameters=self._explanation_parameters,
+                )
+            )
         else:
             managed_model = None
 
@@ -2608,6 +2634,8 @@ class CustomTrainingJob(_CustomTrainingJob):
         model_instance_schema_uri: Optional[str] = None,
         model_parameters_schema_uri: Optional[str] = None,
         model_prediction_schema_uri: Optional[str] = None,
+        explanation_metadata: Optional[explain.ExplanationMetadata] = None,
+        explanation_parameters: Optional[explain.ExplanationParameters] = None,
         project: Optional[str] = None,
         location: Optional[str] = None,
         credentials: Optional[auth_credentials.Credentials] = None,
@@ -2745,6 +2773,15 @@ class CustomTrainingJob(_CustomTrainingJob):
                 and probably different, including the URI scheme, than the
                 one given on input. The output URI will point to a location
                 where the user only has a read access.
+            explanation_metadata (explain.ExplanationMetadata):
+                Optional. Metadata describing the Model's input and output for
+                explanation. `explanation_metadata` is optional while
+                `explanation_parameters` must be specified when used.
+                For more details, see `Ref docs <http://tinyurl.com/1igh60kt>`
+            explanation_parameters (explain.ExplanationParameters):
+                Optional. Parameters to configure explaining for Model's
+                predictions.
+                For more details, see `Ref docs <http://tinyurl.com/1an4zake>`
             project (str):
                 Project to run training in. Overrides project set in aiplatform.init.
             location (str):
@@ -2813,6 +2850,8 @@ class CustomTrainingJob(_CustomTrainingJob):
             model_serving_container_predict_route=model_serving_container_predict_route,
             model_serving_container_health_route=model_serving_container_health_route,
             model_description=model_description,
+            explanation_metadata=explanation_metadata,
+            explanation_parameters=explanation_parameters,
             staging_bucket=staging_bucket,
         )
 
@@ -3010,9 +3049,10 @@ class CustomTrainingJob(_CustomTrainingJob):
                 The full name of the Compute Engine network to which the job
                 should be peered. For example, projects/12345/global/networks/myVPC.
                 Private services access must already be configured for the network.
-                If left unspecified, the job is not peered with any network.
+                If left unspecified, the network set in aiplatform.init will be used.
+                Otherwise, the job is not peered with any network.
             bigquery_destination (str):
-                Provide this field if `dataset` is a BiqQuery dataset.
+                Provide this field if `dataset` is a BigQuery dataset.
                 The BigQuery project location where the training data is to
                 be written to. In the given project a new dataset is created
                 with name
@@ -3150,6 +3190,8 @@ class CustomTrainingJob(_CustomTrainingJob):
             model: The trained Vertex AI Model resource or None if training did not
                 produce a Vertex AI Model.
         """
+        network = network or initializer.global_config.network
+
         worker_pool_specs, managed_model = self._prepare_and_validate_run(
             model_display_name=model_display_name,
             model_labels=model_labels,
@@ -3328,7 +3370,7 @@ class CustomTrainingJob(_CustomTrainingJob):
                 Private services access must already be configured for the network.
                 If left unspecified, the job is not peered with any network.
             bigquery_destination (str):
-                Provide this field if `dataset` is a BiqQuery dataset.
+                Provide this field if `dataset` is a BigQuery dataset.
                 The BigQuery project location where the training data is to
                 be written to. In the given project a new dataset is created
                 with name
@@ -3526,6 +3568,8 @@ class CustomContainerTrainingJob(_CustomTrainingJob):
         model_instance_schema_uri: Optional[str] = None,
         model_parameters_schema_uri: Optional[str] = None,
         model_prediction_schema_uri: Optional[str] = None,
+        explanation_metadata: Optional[explain.ExplanationMetadata] = None,
+        explanation_parameters: Optional[explain.ExplanationParameters] = None,
         project: Optional[str] = None,
         location: Optional[str] = None,
         credentials: Optional[auth_credentials.Credentials] = None,
@@ -3662,6 +3706,15 @@ class CustomContainerTrainingJob(_CustomTrainingJob):
                 and probably different, including the URI scheme, than the
                 one given on input. The output URI will point to a location
                 where the user only has a read access.
+            explanation_metadata (explain.ExplanationMetadata):
+                Optional. Metadata describing the Model's input and output for
+                explanation. `explanation_metadata` is optional while
+                `explanation_parameters` must be specified when used.
+                For more details, see `Ref docs <http://tinyurl.com/1igh60kt>`
+            explanation_parameters (explain.ExplanationParameters):
+                Optional. Parameters to configure explaining for Model's
+                predictions.
+                For more details, see `Ref docs <http://tinyurl.com/1an4zake>`
             project (str):
                 Project to run training in. Overrides project set in aiplatform.init.
             location (str):
@@ -3730,6 +3783,8 @@ class CustomContainerTrainingJob(_CustomTrainingJob):
             model_serving_container_predict_route=model_serving_container_predict_route,
             model_serving_container_health_route=model_serving_container_health_route,
             model_description=model_description,
+            explanation_metadata=explanation_metadata,
+            explanation_parameters=explanation_parameters,
             staging_bucket=staging_bucket,
         )
 
@@ -3919,9 +3974,10 @@ class CustomContainerTrainingJob(_CustomTrainingJob):
                 The full name of the Compute Engine network to which the job
                 should be peered. For example, projects/12345/global/networks/myVPC.
                 Private services access must already be configured for the network.
-                If left unspecified, the job is not peered with any network.
+                If left unspecified, the network set in aiplatform.init will be used.
+                Otherwise, the job is not peered with any network.
             bigquery_destination (str):
-                Provide this field if `dataset` is a BiqQuery dataset.
+                Provide this field if `dataset` is a BigQuery dataset.
                 The BigQuery project location where the training data is to
                 be written to. In the given project a new dataset is created
                 with name
@@ -4064,6 +4120,8 @@ class CustomContainerTrainingJob(_CustomTrainingJob):
                 been set, or model_display_name was provided but required arguments
                 were not provided in constructor.
         """
+        network = network or initializer.global_config.network
+
         worker_pool_specs, managed_model = self._prepare_and_validate_run(
             model_display_name=model_display_name,
             model_labels=model_labels,
@@ -5150,94 +5208,6 @@ class AutoMLForecastingTrainingJob(_ForecastingTrainingJob):
     _training_task_definition = schema.training_job.definition.automl_forecasting
     _supported_training_schemas = (schema.training_job.definition.automl_forecasting,)
 
-    def run(
-        self,
-        dataset: datasets.TimeSeriesDataset,
-        target_column: str,
-        time_column: str,
-        time_series_identifier_column: str,
-        unavailable_at_forecast_columns: List[str],
-        available_at_forecast_columns: List[str],
-        forecast_horizon: int,
-        data_granularity_unit: str,
-        data_granularity_count: int,
-        training_fraction_split: Optional[float] = None,
-        validation_fraction_split: Optional[float] = None,
-        test_fraction_split: Optional[float] = None,
-        predefined_split_column_name: Optional[str] = None,
-        timestamp_split_column_name: Optional[str] = None,
-        weight_column: Optional[str] = None,
-        time_series_attribute_columns: Optional[List[str]] = None,
-        context_window: Optional[int] = None,
-        export_evaluated_data_items: bool = False,
-        export_evaluated_data_items_bigquery_destination_uri: Optional[str] = None,
-        export_evaluated_data_items_override_destination: bool = False,
-        quantiles: Optional[List[float]] = None,
-        validation_options: Optional[str] = None,
-        budget_milli_node_hours: int = 1000,
-        model_display_name: Optional[str] = None,
-        model_labels: Optional[Dict[str, str]] = None,
-        model_id: Optional[str] = None,
-        parent_model: Optional[str] = None,
-        is_default_version: Optional[bool] = True,
-        model_version_aliases: Optional[Sequence[str]] = None,
-        model_version_description: Optional[str] = None,
-        additional_experiments: Optional[List[str]] = None,
-        hierarchy_group_columns: Optional[List[str]] = None,
-        hierarchy_group_total_weight: Optional[float] = None,
-        hierarchy_temporal_total_weight: Optional[float] = None,
-        hierarchy_group_temporal_total_weight: Optional[float] = None,
-        window_column: Optional[str] = None,
-        window_stride_length: Optional[int] = None,
-        window_max_count: Optional[int] = None,
-        holiday_regions: Optional[List[str]] = None,
-        sync: bool = True,
-        create_request_timeout: Optional[float] = None,
-    ) -> models.Model:
-        return super().run(
-            dataset=dataset,
-            target_column=target_column,
-            time_column=time_column,
-            time_series_identifier_column=time_series_identifier_column,
-            unavailable_at_forecast_columns=unavailable_at_forecast_columns,
-            available_at_forecast_columns=available_at_forecast_columns,
-            forecast_horizon=forecast_horizon,
-            data_granularity_unit=data_granularity_unit,
-            data_granularity_count=data_granularity_count,
-            training_fraction_split=training_fraction_split,
-            validation_fraction_split=validation_fraction_split,
-            test_fraction_split=test_fraction_split,
-            predefined_split_column_name=predefined_split_column_name,
-            timestamp_split_column_name=timestamp_split_column_name,
-            weight_column=weight_column,
-            time_series_attribute_columns=time_series_attribute_columns,
-            context_window=context_window,
-            budget_milli_node_hours=budget_milli_node_hours,
-            export_evaluated_data_items=export_evaluated_data_items,
-            export_evaluated_data_items_bigquery_destination_uri=export_evaluated_data_items_bigquery_destination_uri,
-            export_evaluated_data_items_override_destination=export_evaluated_data_items_override_destination,
-            quantiles=quantiles,
-            validation_options=validation_options,
-            model_display_name=model_display_name,
-            model_labels=model_labels,
-            model_id=model_id,
-            parent_model=parent_model,
-            is_default_version=is_default_version,
-            model_version_aliases=model_version_aliases,
-            model_version_description=model_version_description,
-            additional_experiments=additional_experiments,
-            hierarchy_group_columns=hierarchy_group_columns,
-            hierarchy_group_total_weight=hierarchy_group_total_weight,
-            hierarchy_temporal_total_weight=hierarchy_temporal_total_weight,
-            hierarchy_group_temporal_total_weight=hierarchy_group_temporal_total_weight,
-            window_column=window_column,
-            window_stride_length=window_stride_length,
-            window_max_count=window_max_count,
-            holiday_regions=holiday_regions,
-            sync=sync,
-            create_request_timeout=create_request_timeout,
-        )
-
 
 class SequenceToSequencePlusForecastingTrainingJob(_ForecastingTrainingJob):
     _model_type = "Seq2Seq"
@@ -5245,94 +5215,6 @@ class SequenceToSequencePlusForecastingTrainingJob(_ForecastingTrainingJob):
     _supported_training_schemas = (
         schema.training_job.definition.seq2seq_plus_forecasting,
     )
-
-    def run(
-        self,
-        dataset: datasets.TimeSeriesDataset,
-        target_column: str,
-        time_column: str,
-        time_series_identifier_column: str,
-        unavailable_at_forecast_columns: List[str],
-        available_at_forecast_columns: List[str],
-        forecast_horizon: int,
-        data_granularity_unit: str,
-        data_granularity_count: int,
-        training_fraction_split: Optional[float] = None,
-        validation_fraction_split: Optional[float] = None,
-        test_fraction_split: Optional[float] = None,
-        predefined_split_column_name: Optional[str] = None,
-        timestamp_split_column_name: Optional[str] = None,
-        weight_column: Optional[str] = None,
-        time_series_attribute_columns: Optional[List[str]] = None,
-        context_window: Optional[int] = None,
-        export_evaluated_data_items: bool = False,
-        export_evaluated_data_items_bigquery_destination_uri: Optional[str] = None,
-        export_evaluated_data_items_override_destination: bool = False,
-        quantiles: Optional[List[float]] = None,
-        validation_options: Optional[str] = None,
-        budget_milli_node_hours: int = 1000,
-        model_display_name: Optional[str] = None,
-        model_labels: Optional[Dict[str, str]] = None,
-        model_id: Optional[str] = None,
-        parent_model: Optional[str] = None,
-        is_default_version: Optional[bool] = True,
-        model_version_aliases: Optional[Sequence[str]] = None,
-        model_version_description: Optional[str] = None,
-        additional_experiments: Optional[List[str]] = None,
-        hierarchy_group_columns: Optional[List[str]] = None,
-        hierarchy_group_total_weight: Optional[float] = None,
-        hierarchy_temporal_total_weight: Optional[float] = None,
-        hierarchy_group_temporal_total_weight: Optional[float] = None,
-        window_column: Optional[str] = None,
-        window_stride_length: Optional[int] = None,
-        window_max_count: Optional[int] = None,
-        holiday_regions: Optional[List[str]] = None,
-        sync: bool = True,
-        create_request_timeout: Optional[float] = None,
-    ) -> models.Model:
-        return super().run(
-            dataset=dataset,
-            target_column=target_column,
-            time_column=time_column,
-            time_series_identifier_column=time_series_identifier_column,
-            unavailable_at_forecast_columns=unavailable_at_forecast_columns,
-            available_at_forecast_columns=available_at_forecast_columns,
-            forecast_horizon=forecast_horizon,
-            data_granularity_unit=data_granularity_unit,
-            data_granularity_count=data_granularity_count,
-            training_fraction_split=training_fraction_split,
-            validation_fraction_split=validation_fraction_split,
-            test_fraction_split=test_fraction_split,
-            predefined_split_column_name=predefined_split_column_name,
-            timestamp_split_column_name=timestamp_split_column_name,
-            model_id=model_id,
-            parent_model=parent_model,
-            is_default_version=is_default_version,
-            model_version_aliases=model_version_aliases,
-            model_version_description=model_version_description,
-            weight_column=weight_column,
-            time_series_attribute_columns=time_series_attribute_columns,
-            context_window=context_window,
-            budget_milli_node_hours=budget_milli_node_hours,
-            export_evaluated_data_items=export_evaluated_data_items,
-            export_evaluated_data_items_bigquery_destination_uri=export_evaluated_data_items_bigquery_destination_uri,
-            export_evaluated_data_items_override_destination=export_evaluated_data_items_override_destination,
-            quantiles=quantiles,
-            validation_options=validation_options,
-            model_display_name=model_display_name,
-            model_labels=model_labels,
-            additional_experiments=additional_experiments,
-            hierarchy_group_columns=hierarchy_group_columns,
-            hierarchy_group_total_weight=hierarchy_group_total_weight,
-            hierarchy_temporal_total_weight=hierarchy_temporal_total_weight,
-            hierarchy_group_temporal_total_weight=hierarchy_group_temporal_total_weight,
-            window_column=window_column,
-            window_stride_length=window_stride_length,
-            window_max_count=window_max_count,
-            holiday_regions=holiday_regions,
-            sync=sync,
-            create_request_timeout=create_request_timeout,
-        )
 
 
 class AutoMLImageTrainingJob(_TrainingJob):
@@ -5947,6 +5829,8 @@ class CustomPythonPackageTrainingJob(_CustomTrainingJob):
         model_instance_schema_uri: Optional[str] = None,
         model_parameters_schema_uri: Optional[str] = None,
         model_prediction_schema_uri: Optional[str] = None,
+        explanation_metadata: Optional[explain.ExplanationMetadata] = None,
+        explanation_parameters: Optional[explain.ExplanationParameters] = None,
         project: Optional[str] = None,
         location: Optional[str] = None,
         credentials: Optional[auth_credentials.Credentials] = None,
@@ -6088,6 +5972,15 @@ class CustomPythonPackageTrainingJob(_CustomTrainingJob):
                 and probably different, including the URI scheme, than the
                 one given on input. The output URI will point to a location
                 where the user only has a read access.
+            explanation_metadata (explain.ExplanationMetadata):
+                Optional. Metadata describing the Model's input and output for
+                explanation. `explanation_metadata` is optional while
+                `explanation_parameters` must be specified when used.
+                For more details, see `Ref docs <http://tinyurl.com/1igh60kt>`
+            explanation_parameters (explain.ExplanationParameters):
+                Optional. Parameters to configure explaining for Model's
+                predictions.
+                For more details, see `Ref docs <http://tinyurl.com/1an4zake>`
             project (str):
                 Project to run training in. Overrides project set in aiplatform.init.
             location (str):
@@ -6156,6 +6049,8 @@ class CustomPythonPackageTrainingJob(_CustomTrainingJob):
             model_serving_container_predict_route=model_serving_container_predict_route,
             model_serving_container_health_route=model_serving_container_health_route,
             model_description=model_description,
+            explanation_metadata=explanation_metadata,
+            explanation_parameters=explanation_parameters,
             staging_bucket=staging_bucket,
         )
 
@@ -6346,9 +6241,10 @@ class CustomPythonPackageTrainingJob(_CustomTrainingJob):
                 The full name of the Compute Engine network to which the job
                 should be peered. For example, projects/12345/global/networks/myVPC.
                 Private services access must already be configured for the network.
-                If left unspecified, the job is not peered with any network.
+                If left unspecified, the network set in aiplatform.init will be used.
+                Otherwise, the job is not peered with any network.
             bigquery_destination (str):
-                Provide this field if `dataset` is a BiqQuery dataset.
+                Provide this field if `dataset` is a BigQuery dataset.
                 The BigQuery project location where the training data is to
                 be written to. In the given project a new dataset is created
                 with name
@@ -6486,6 +6382,8 @@ class CustomPythonPackageTrainingJob(_CustomTrainingJob):
             model: The trained Vertex AI Model resource or None if training did not
                 produce a Vertex AI Model.
         """
+        network = network or initializer.global_config.network
+
         worker_pool_specs, managed_model = self._prepare_and_validate_run(
             model_display_name=model_display_name,
             model_labels=model_labels,

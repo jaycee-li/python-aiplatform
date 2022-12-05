@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ xai_extra_require = ["tensorflow >=2.3.0, <3.0.0dev"]
 lit_extra_require = [
     "tensorflow >= 2.3.0, <3.0.0dev",
     "pandas >= 1.0.0",
-    "lit-nlp >= 0.4.0",
+    "lit-nlp == 0.4.0",
     "explainable-ai-sdk >= 1.0.0",
 ]
 profiler_extra_require = [
@@ -68,7 +68,7 @@ vizier_extra_require = [
     "portpicker==1.3.1",
     "googleapis-common-protos==1.56.0",
     "google-api-python-client==1.12.8",
-    "google-vizier==0.0.3a",
+    "google-vizier==0.0.4",
 ]
 
 prediction_extra_require = [
@@ -130,7 +130,7 @@ setuptools.setup(
     install_requires=(
         "google-api-core[grpc] >= 1.32.0, <3.0.0dev,!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*",
         "proto-plus >= 1.22.0, <2.0.0dev",
-        "protobuf >= 3.19.0, <5.0.0dev",
+        "protobuf>=3.19.5,<5.0.0dev,!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5",
         "packaging >= 14.3, <22.0.0dev",
         "google-cloud-storage >= 1.32.0, < 3.0.0dev",
         "google-cloud-bigquery >= 1.15.0, < 3.0.0dev",
@@ -161,6 +161,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Internet",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],

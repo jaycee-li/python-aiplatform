@@ -18,8 +18,8 @@ import os
 # try/except added for compatibility with python < 3.8
 try:
     from unittest import mock
-    from unittest.mock import AsyncMock
-except ImportError:
+    from unittest.mock import AsyncMock  # pragma: NO COVER
+except ImportError:  # pragma: NO COVER
     import mock
 
 import grpc
@@ -27,7 +27,7 @@ from grpc.experimental import aio
 import math
 import pytest
 from proto.marshal.rules.dates import DurationRule, TimestampRule
-
+from proto.marshal.rules import wrappers
 
 from google.api_core import client_options
 from google.api_core import exceptions as core_exceptions
@@ -967,6 +967,7 @@ def test_get_dataset(request_type, transport: str = "grpc"):
             description="description_value",
             metadata_schema_uri="metadata_schema_uri_value",
             etag="etag_value",
+            metadata_artifact="metadata_artifact_value",
         )
         response = client.get_dataset(request)
 
@@ -982,6 +983,7 @@ def test_get_dataset(request_type, transport: str = "grpc"):
     assert response.description == "description_value"
     assert response.metadata_schema_uri == "metadata_schema_uri_value"
     assert response.etag == "etag_value"
+    assert response.metadata_artifact == "metadata_artifact_value"
 
 
 def test_get_dataset_empty_call():
@@ -1023,6 +1025,7 @@ async def test_get_dataset_async(
                 description="description_value",
                 metadata_schema_uri="metadata_schema_uri_value",
                 etag="etag_value",
+                metadata_artifact="metadata_artifact_value",
             )
         )
         response = await client.get_dataset(request)
@@ -1039,6 +1042,7 @@ async def test_get_dataset_async(
     assert response.description == "description_value"
     assert response.metadata_schema_uri == "metadata_schema_uri_value"
     assert response.etag == "etag_value"
+    assert response.metadata_artifact == "metadata_artifact_value"
 
 
 @pytest.mark.asyncio
@@ -1211,6 +1215,7 @@ def test_update_dataset(request_type, transport: str = "grpc"):
             description="description_value",
             metadata_schema_uri="metadata_schema_uri_value",
             etag="etag_value",
+            metadata_artifact="metadata_artifact_value",
         )
         response = client.update_dataset(request)
 
@@ -1226,6 +1231,7 @@ def test_update_dataset(request_type, transport: str = "grpc"):
     assert response.description == "description_value"
     assert response.metadata_schema_uri == "metadata_schema_uri_value"
     assert response.etag == "etag_value"
+    assert response.metadata_artifact == "metadata_artifact_value"
 
 
 def test_update_dataset_empty_call():
@@ -1267,6 +1273,7 @@ async def test_update_dataset_async(
                 description="description_value",
                 metadata_schema_uri="metadata_schema_uri_value",
                 etag="etag_value",
+                metadata_artifact="metadata_artifact_value",
             )
         )
         response = await client.update_dataset(request)
@@ -1283,6 +1290,7 @@ async def test_update_dataset_async(
     assert response.description == "description_value"
     assert response.metadata_schema_uri == "metadata_schema_uri_value"
     assert response.etag == "etag_value"
+    assert response.metadata_artifact == "metadata_artifact_value"
 
 
 @pytest.mark.asyncio

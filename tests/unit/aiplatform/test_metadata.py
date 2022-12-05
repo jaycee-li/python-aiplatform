@@ -56,6 +56,7 @@ from google.cloud.aiplatform.metadata import experiment_run_resource
 from google.cloud.aiplatform.metadata import metadata
 from google.cloud.aiplatform.metadata import metadata_store
 from google.cloud.aiplatform.metadata import utils as metadata_utils
+
 from google.cloud.aiplatform import utils
 
 from test_pipeline_jobs import mock_pipeline_service_get  # noqa: F401
@@ -76,6 +77,7 @@ _TEST_OTHER_EXPERIMENT_DESCRIPTION = "test-other-experiment-description"
 _TEST_PIPELINE = _TEST_EXPERIMENT
 _TEST_RUN = "run-1"
 _TEST_OTHER_RUN = "run-2"
+_TEST_DISPLAY_NAME = "test-display-name"
 
 # resource attributes
 _TEST_METADATA = {"test-param1": 1, "test-param2": "test-value", "test-param3": True}
@@ -94,6 +96,15 @@ _TEST_EXECUTION_ID = f"{_TEST_EXPERIMENT}-{_TEST_RUN}"
 _TEST_EXECUTION_NAME = f"{_TEST_PARENT}/executions/{_TEST_EXECUTION_ID}"
 _TEST_OTHER_EXECUTION_ID = f"{_TEST_EXPERIMENT}-{_TEST_OTHER_RUN}"
 _TEST_OTHER_EXECUTION_NAME = f"{_TEST_PARENT}/executions/{_TEST_OTHER_EXECUTION_ID}"
+_TEST_SCHEMA_TITLE = "test.Schema"
+
+_TEST_EXECUTION = GapicExecution(
+    name=_TEST_EXECUTION_NAME,
+    schema_title=_TEST_SCHEMA_TITLE,
+    display_name=_TEST_DISPLAY_NAME,
+    metadata=_TEST_METADATA,
+    state=GapicExecution.State.RUNNING,
+)
 
 # artifact
 _TEST_ARTIFACT_ID = f"{_TEST_EXPERIMENT}-{_TEST_RUN}-metrics"
@@ -112,6 +123,16 @@ _TEST_METRIC_KEY_1 = "rmse"
 _TEST_METRIC_KEY_2 = "accuracy"
 _TEST_METRICS = {_TEST_METRIC_KEY_1: 222, _TEST_METRIC_KEY_2: 1}
 _TEST_OTHER_METRICS = {_TEST_METRIC_KEY_2: 0.9}
+
+# classification_metrics
+_TEST_CLASSIFICATION_METRICS = {
+    "display_name": "my-classification-metrics",
+    "labels": ["cat", "dog"],
+    "matrix": [[9, 1], [1, 9]],
+    "fpr": [0.1, 0.5, 0.9],
+    "tpr": [0.1, 0.7, 0.9],
+    "threshold": [0.9, 0.5, 0.1],
+}
 
 # schema
 _TEST_WRONG_SCHEMA_TITLE = "system.WrongSchema"
@@ -398,6 +419,50 @@ def query_execution_inputs_and_outputs_mock():
         yield query_execution_inputs_and_outputs_mock
 
 
+_TEST_CLASSIFICATION_METRICS_METADATA = {
+    "confusionMatrix": {
+        "annotationSpecs": [{"displayName": "cat"}, {"displayName": "dog"}],
+        "rows": [[9, 1], [1, 9]],
+    },
+    "confidenceMetrics": [
+        {"confidenceThreshold": 0.9, "recall": 0.1, "falsePositiveRate": 0.1},
+        {"confidenceThreshold": 0.5, "recall": 0.7, "falsePositiveRate": 0.5},
+        {"confidenceThreshold": 0.1, "recall": 0.9, "falsePositiveRate": 0.9},
+    ],
+}
+
+_TEST_CLASSIFICATION_METRICS_ARTIFACT = GapicArtifact(
+    name=_TEST_ARTIFACT_NAME,
+    display_name=_TEST_CLASSIFICATION_METRICS["display_name"],
+    schema_title=constants.GOOGLE_CLASSIFICATION_METRICS,
+    schema_version=constants._DEFAULT_SCHEMA_VERSION,
+    metadata=_TEST_CLASSIFICATION_METRICS_METADATA,
+    state=GapicArtifact.State.LIVE,
+)
+
+
+@pytest.fixture
+def create_classification_metrics_artifact_mock():
+    with patch.object(
+        MetadataServiceClient, "create_artifact"
+    ) as create_classification_metrics_artifact_mock:
+        create_classification_metrics_artifact_mock.return_value = (
+            _TEST_CLASSIFICATION_METRICS_ARTIFACT
+        )
+        yield create_classification_metrics_artifact_mock
+
+
+@pytest.fixture
+def get_classification_metrics_artifact_mock():
+    with patch.object(
+        MetadataServiceClient, "get_artifact"
+    ) as get_classification_metrics_artifact_mock:
+        get_classification_metrics_artifact_mock.return_value = (
+            _TEST_CLASSIFICATION_METRICS_ARTIFACT
+        )
+        yield get_classification_metrics_artifact_mock
+
+
 @pytest.fixture
 def get_artifact_mock():
     with patch.object(MetadataServiceClient, "get_artifact") as get_artifact_mock:
@@ -610,6 +675,15 @@ def update_experiment_run_context_to_running():
     with patch.object(MetadataServiceClient, "update_context") as update_context_mock:
         update_context_mock.side_effect = [_EXPERIMENT_RUN_MOCK]
         yield update_context_mock
+
+
+@pytest.fixture
+def create_execution_mock():
+    with patch.object(
+        MetadataServiceClient, "create_execution"
+    ) as create_execution_mock:
+        create_execution_mock.side_effect = [_TEST_EXECUTION]
+        yield create_execution_mock
 
 
 @pytest.fixture
@@ -1117,6 +1191,56 @@ class TestExperiments:
         "get_experiment_mock",
         "create_experiment_run_context_mock",
         "add_context_children_mock",
+    )
+    def test_log_classification_metrics(
+        self,
+        create_classification_metrics_artifact_mock,
+        get_classification_metrics_artifact_mock,
+        add_context_artifacts_and_executions_mock,
+    ):
+        aiplatform.init(
+            project=_TEST_PROJECT,
+            location=_TEST_LOCATION,
+            experiment=_TEST_EXPERIMENT,
+        )
+        aiplatform.start_run(_TEST_RUN)
+        aiplatform.log_classification_metrics(
+            display_name=_TEST_CLASSIFICATION_METRICS["display_name"],
+            labels=_TEST_CLASSIFICATION_METRICS["labels"],
+            matrix=_TEST_CLASSIFICATION_METRICS["matrix"],
+            fpr=_TEST_CLASSIFICATION_METRICS["fpr"],
+            tpr=_TEST_CLASSIFICATION_METRICS["tpr"],
+            threshold=_TEST_CLASSIFICATION_METRICS["threshold"],
+        )
+
+        expected_artifact = GapicArtifact(
+            display_name=_TEST_CLASSIFICATION_METRICS["display_name"],
+            schema_title=constants.GOOGLE_CLASSIFICATION_METRICS,
+            schema_version=constants._DEFAULT_SCHEMA_VERSION,
+            metadata=_TEST_CLASSIFICATION_METRICS_METADATA,
+            state=GapicArtifact.State.LIVE,
+        )
+        create_classification_metrics_artifact_mock.assert_called_once_with(
+            parent=_TEST_PARENT,
+            artifact=expected_artifact,
+            artifact_id=None,
+        )
+
+        get_classification_metrics_artifact_mock.assert_called_once_with(
+            name=_TEST_ARTIFACT_NAME, retry=base._DEFAULT_RETRY
+        )
+
+        add_context_artifacts_and_executions_mock.assert_called_once_with(
+            context=_TEST_EXPERIMENT_RUN_CONTEXT_NAME,
+            artifacts=[_TEST_ARTIFACT_NAME],
+            executions=None,
+        )
+
+    @pytest.mark.usefixtures(
+        "get_metadata_store_mock",
+        "get_experiment_mock",
+        "create_experiment_run_context_mock",
+        "add_context_children_mock",
         "get_tensorboard_mock",
         "get_tensorboard_run_not_found_mock",
         "get_tensorboard_experiment_not_found_mock",
@@ -1245,6 +1369,86 @@ class TestExperiments:
         aiplatform.start_run(_TEST_RUN)
         with pytest.raises(TypeError):
             aiplatform.log_params({"test": {"nested": "string"}})
+
+    @pytest.mark.usefixtures(
+        "get_metadata_store_mock",
+        "get_experiment_mock",
+        "create_experiment_run_context_mock",
+        "add_context_children_mock",
+        "get_artifact_mock",
+    )
+    def test_start_execution_and_assign_artifact(
+        self,
+        create_execution_mock,
+        add_execution_events_mock,
+        add_context_artifacts_and_executions_mock,
+        update_execution_mock,
+    ):
+        aiplatform.init(
+            project=_TEST_PROJECT, location=_TEST_LOCATION, experiment=_TEST_EXPERIMENT
+        )
+        aiplatform.start_run(_TEST_RUN)
+
+        in_artifact = aiplatform.Artifact(_TEST_ARTIFACT_ID)
+        out_artifact = aiplatform.Artifact(_TEST_ARTIFACT_ID)
+
+        with aiplatform.start_execution(
+            schema_title=_TEST_SCHEMA_TITLE,
+            display_name=_TEST_DISPLAY_NAME,
+            metadata=_TEST_METADATA,
+        ) as exc:
+
+            exc.assign_input_artifacts([in_artifact])
+            exc.assign_output_artifacts([out_artifact])
+
+        _created_execution = copy.deepcopy(_TEST_EXECUTION)
+        _created_execution.name = None
+
+        create_execution_mock.assert_called_once_with(
+            parent=_TEST_PARENT, execution=_created_execution, execution_id=None
+        )
+
+        in_event = gca_event.Event(
+            artifact=_TEST_ARTIFACT_NAME,
+            type_=gca_event.Event.Type.INPUT,
+        )
+
+        out_event = gca_event.Event(
+            artifact=_TEST_ARTIFACT_NAME,
+            type_=gca_event.Event.Type.OUTPUT,
+        )
+
+        add_execution_events_mock.assert_has_calls(
+            [
+                call(execution=_TEST_EXECUTION.name, events=[in_event]),
+                call(execution=_TEST_EXECUTION.name, events=[out_event]),
+            ]
+        )
+
+        add_context_artifacts_and_executions_mock.assert_has_calls(
+            [
+                call(
+                    context=_TEST_EXPERIMENT_RUN_CONTEXT_NAME,
+                    artifacts=None,
+                    executions=[_TEST_EXECUTION.name],
+                ),
+                call(
+                    context=_TEST_EXPERIMENT_RUN_CONTEXT_NAME,
+                    artifacts=[_TEST_ARTIFACT_NAME],
+                    executions=[],
+                ),
+                call(
+                    context=_TEST_EXPERIMENT_RUN_CONTEXT_NAME,
+                    artifacts=[_TEST_ARTIFACT_NAME],
+                    executions=[],
+                ),
+            ]
+        )
+
+        updated_execution = copy.deepcopy(_TEST_EXECUTION)
+        updated_execution.state = GapicExecution.State.COMPLETE
+
+        update_execution_mock.assert_called_once_with(execution=updated_execution)
 
     @pytest.mark.usefixtures(
         "get_metadata_store_mock",

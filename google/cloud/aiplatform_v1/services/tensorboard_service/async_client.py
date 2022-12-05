@@ -269,6 +269,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_create_tensorboard():
@@ -323,8 +330,8 @@ class TensorboardServiceAsyncClient:
 
                 The result type for the operation will be :class:`google.cloud.aiplatform_v1.types.Tensorboard` Tensorboard is a physical database that stores users' training metrics.
                    A default Tensorboard is provided in each region of a
-                   GCP project. If needed users can also create extra
-                   Tensorboards in their projects.
+                   Google Cloud project. If needed users can also create
+                   extra Tensorboards in their projects.
 
         """
         # Create or coerce a protobuf request object.
@@ -392,6 +399,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_get_tensorboard():
@@ -431,9 +445,9 @@ class TensorboardServiceAsyncClient:
                 Tensorboard is a physical database
                 that stores users' training metrics. A
                 default Tensorboard is provided in each
-                region of a GCP project. If needed users
-                can also create extra Tensorboards in
-                their projects.
+                region of a Google Cloud project. If
+                needed users can also create extra
+                Tensorboards in their projects.
 
         """
         # Create or coerce a protobuf request object.
@@ -492,6 +506,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_update_tensorboard():
@@ -552,8 +573,8 @@ class TensorboardServiceAsyncClient:
 
                 The result type for the operation will be :class:`google.cloud.aiplatform_v1.types.Tensorboard` Tensorboard is a physical database that stores users' training metrics.
                    A default Tensorboard is provided in each region of a
-                   GCP project. If needed users can also create extra
-                   Tensorboards in their projects.
+                   Google Cloud project. If needed users can also create
+                   extra Tensorboards in their projects.
 
         """
         # Create or coerce a protobuf request object.
@@ -623,6 +644,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_list_tensorboards():
@@ -732,6 +760,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_delete_tensorboard():
@@ -854,6 +889,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_create_tensorboard_experiment():
@@ -977,6 +1019,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_get_tensorboard_experiment():
@@ -1078,6 +1127,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_update_tensorboard_experiment():
@@ -1194,6 +1250,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_list_tensorboard_experiments():
@@ -1217,10 +1280,9 @@ class TensorboardServiceAsyncClient:
                 The request object. Request message for
                 [TensorboardService.ListTensorboardExperiments][google.cloud.aiplatform.v1.TensorboardService.ListTensorboardExperiments].
             parent (:class:`str`):
-                Required. The resource name of the
-                Tensorboard to list
+                Required. The resource name of the Tensorboard to list
                 TensorboardExperiments. Format:
-                'projects/{project}/locations/{location}/tensorboards/{tensorboard}'
+                ``projects/{project}/locations/{location}/tensorboards/{tensorboard}``
 
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
@@ -1306,6 +1368,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_delete_tensorboard_experiment():
@@ -1426,6 +1495,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_create_tensorboard_run():
@@ -1554,6 +1630,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_batch_create_tensorboard_runs():
@@ -1670,6 +1753,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_get_tensorboard_run():
@@ -1769,6 +1859,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_update_tensorboard_run():
@@ -1886,6 +1983,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_list_tensorboard_runs():
@@ -1909,10 +2013,9 @@ class TensorboardServiceAsyncClient:
                 The request object. Request message for
                 [TensorboardService.ListTensorboardRuns][google.cloud.aiplatform.v1.TensorboardService.ListTensorboardRuns].
             parent (:class:`str`):
-                Required. The resource name of the
-                TensorboardExperiment to list
-                TensorboardRuns. Format:
-                'projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}'
+                Required. The resource name of the TensorboardExperiment
+                to list TensorboardRuns. Format:
+                ``projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}``
 
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
@@ -1996,6 +2099,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_delete_tensorboard_run():
@@ -2120,6 +2230,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_batch_create_tensorboard_time_series():
@@ -2240,6 +2357,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_create_tensorboard_time_series():
@@ -2352,6 +2476,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_get_tensorboard_time_series():
@@ -2451,6 +2582,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_update_tensorboard_time_series():
@@ -2575,6 +2713,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_list_tensorboard_time_series():
@@ -2598,10 +2743,9 @@ class TensorboardServiceAsyncClient:
                 The request object. Request message for
                 [TensorboardService.ListTensorboardTimeSeries][google.cloud.aiplatform.v1.TensorboardService.ListTensorboardTimeSeries].
             parent (:class:`str`):
-                Required. The resource name of the
-                TensorboardRun to list
-                TensorboardTimeSeries. Format:
-                'projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}/runs/{run}'
+                Required. The resource name of the TensorboardRun to
+                list TensorboardTimeSeries. Format:
+                ``projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}/runs/{run}``
 
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
@@ -2687,6 +2831,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_delete_tensorboard_time_series():
@@ -2812,6 +2963,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_batch_read_tensorboard_time_series_data():
@@ -2821,7 +2979,7 @@ class TensorboardServiceAsyncClient:
                 # Initialize request argument(s)
                 request = aiplatform_v1.BatchReadTensorboardTimeSeriesDataRequest(
                     tensorboard="tensorboard_value",
-                    time_series=['time_series_value_1', 'time_series_value_2'],
+                    time_series=['time_series_value1', 'time_series_value2'],
                 )
 
                 # Make the request
@@ -2921,6 +3079,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_read_tensorboard_time_series_data():
@@ -3022,6 +3187,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_read_tensorboard_blob_data():
@@ -3047,7 +3219,7 @@ class TensorboardServiceAsyncClient:
             time_series (:class:`str`):
                 Required. The resource name of the TensorboardTimeSeries
                 to list Blobs. Format:
-                'projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}/runs/{run}/timeSeries/{time_series}'
+                ``projects/{project}/locations/{location}/tensorboards/{tensorboard}/experiments/{experiment}/runs/{run}/timeSeries/{time_series}``
 
                 This corresponds to the ``time_series`` field
                 on the ``request`` instance; if ``request`` is provided, this
@@ -3128,6 +3300,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_write_tensorboard_experiment_data():
@@ -3244,6 +3423,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_write_tensorboard_run_data():
@@ -3365,6 +3551,13 @@ class TensorboardServiceAsyncClient:
 
         .. code-block:: python
 
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
             from google.cloud import aiplatform_v1
 
             async def sample_export_tensorboard_time_series_data():

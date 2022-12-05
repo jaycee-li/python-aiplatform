@@ -18,8 +18,8 @@ import os
 # try/except added for compatibility with python < 3.8
 try:
     from unittest import mock
-    from unittest.mock import AsyncMock
-except ImportError:
+    from unittest.mock import AsyncMock  # pragma: NO COVER
+except ImportError:  # pragma: NO COVER
     import mock
 
 import grpc
@@ -27,7 +27,7 @@ from grpc.experimental import aio
 import math
 import pytest
 from proto.marshal.rules.dates import DurationRule, TimestampRule
-
+from proto.marshal.rules import wrappers
 
 from google.api_core import client_options
 from google.api_core import exceptions as core_exceptions
@@ -5096,6 +5096,7 @@ def test_create_batch_prediction_job(request_type, transport: str = "grpc"):
             display_name="display_name_value",
             model="model_value",
             model_version_id="model_version_id_value",
+            service_account="service_account_value",
             generate_explanation=True,
             state=job_state.JobState.JOB_STATE_QUEUED,
         )
@@ -5112,6 +5113,7 @@ def test_create_batch_prediction_job(request_type, transport: str = "grpc"):
     assert response.display_name == "display_name_value"
     assert response.model == "model_value"
     assert response.model_version_id == "model_version_id_value"
+    assert response.service_account == "service_account_value"
     assert response.generate_explanation is True
     assert response.state == job_state.JobState.JOB_STATE_QUEUED
 
@@ -5159,6 +5161,7 @@ async def test_create_batch_prediction_job_async(
                 display_name="display_name_value",
                 model="model_value",
                 model_version_id="model_version_id_value",
+                service_account="service_account_value",
                 generate_explanation=True,
                 state=job_state.JobState.JOB_STATE_QUEUED,
             )
@@ -5176,6 +5179,7 @@ async def test_create_batch_prediction_job_async(
     assert response.display_name == "display_name_value"
     assert response.model == "model_value"
     assert response.model_version_id == "model_version_id_value"
+    assert response.service_account == "service_account_value"
     assert response.generate_explanation is True
     assert response.state == job_state.JobState.JOB_STATE_QUEUED
 
@@ -5381,6 +5385,7 @@ def test_get_batch_prediction_job(request_type, transport: str = "grpc"):
             display_name="display_name_value",
             model="model_value",
             model_version_id="model_version_id_value",
+            service_account="service_account_value",
             generate_explanation=True,
             state=job_state.JobState.JOB_STATE_QUEUED,
         )
@@ -5397,6 +5402,7 @@ def test_get_batch_prediction_job(request_type, transport: str = "grpc"):
     assert response.display_name == "display_name_value"
     assert response.model == "model_value"
     assert response.model_version_id == "model_version_id_value"
+    assert response.service_account == "service_account_value"
     assert response.generate_explanation is True
     assert response.state == job_state.JobState.JOB_STATE_QUEUED
 
@@ -5444,6 +5450,7 @@ async def test_get_batch_prediction_job_async(
                 display_name="display_name_value",
                 model="model_value",
                 model_version_id="model_version_id_value",
+                service_account="service_account_value",
                 generate_explanation=True,
                 state=job_state.JobState.JOB_STATE_QUEUED,
             )
@@ -5461,6 +5468,7 @@ async def test_get_batch_prediction_job_async(
     assert response.display_name == "display_name_value"
     assert response.model == "model_value"
     assert response.model_version_id == "model_version_id_value"
+    assert response.service_account == "service_account_value"
     assert response.generate_explanation is True
     assert response.state == job_state.JobState.JOB_STATE_QUEUED
 

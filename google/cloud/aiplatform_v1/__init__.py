@@ -142,6 +142,9 @@ from .types.featurestore_online_service import FeatureValueList
 from .types.featurestore_online_service import ReadFeatureValuesRequest
 from .types.featurestore_online_service import ReadFeatureValuesResponse
 from .types.featurestore_online_service import StreamingReadFeatureValuesRequest
+from .types.featurestore_online_service import WriteFeatureValuesPayload
+from .types.featurestore_online_service import WriteFeatureValuesRequest
+from .types.featurestore_online_service import WriteFeatureValuesResponse
 from .types.featurestore_service import BatchCreateFeaturesOperationMetadata
 from .types.featurestore_service import BatchCreateFeaturesRequest
 from .types.featurestore_service import BatchCreateFeaturesResponse
@@ -317,6 +320,8 @@ from .types.metadata_service import PurgeExecutionsResponse
 from .types.metadata_service import QueryArtifactLineageSubgraphRequest
 from .types.metadata_service import QueryContextLineageSubgraphRequest
 from .types.metadata_service import QueryExecutionInputsAndOutputsRequest
+from .types.metadata_service import RemoveContextChildrenRequest
+from .types.metadata_service import RemoveContextChildrenResponse
 from .types.metadata_service import UpdateArtifactRequest
 from .types.metadata_service import UpdateContextRequest
 from .types.metadata_service import UpdateExecutionRequest
@@ -331,6 +336,7 @@ from .types.migration_service import SearchMigratableResourcesRequest
 from .types.migration_service import SearchMigratableResourcesResponse
 from .types.model import Model
 from .types.model import ModelContainerSpec
+from .types.model import ModelSourceInfo
 from .types.model import Port
 from .types.model import PredictSchemata
 from .types.model_deployment_monitoring_job import (
@@ -855,6 +861,7 @@ __all__ = (
     "ModelMonitoringObjectiveConfig",
     "ModelMonitoringStatsAnomalies",
     "ModelServiceClient",
+    "ModelSourceInfo",
     "MutateDeployedIndexOperationMetadata",
     "MutateDeployedIndexRequest",
     "MutateDeployedIndexResponse",
@@ -898,6 +905,8 @@ __all__ = (
     "ReadTensorboardBlobDataResponse",
     "ReadTensorboardTimeSeriesDataRequest",
     "ReadTensorboardTimeSeriesDataResponse",
+    "RemoveContextChildrenRequest",
+    "RemoveContextChildrenResponse",
     "RemoveDatapointsRequest",
     "RemoveDatapointsResponse",
     "ResourcesConsumed",
@@ -980,6 +989,9 @@ __all__ = (
     "Value",
     "VizierServiceClient",
     "WorkerPoolSpec",
+    "WriteFeatureValuesPayload",
+    "WriteFeatureValuesRequest",
+    "WriteFeatureValuesResponse",
     "WriteTensorboardExperimentDataRequest",
     "WriteTensorboardExperimentDataResponse",
     "WriteTensorboardRunDataRequest",

@@ -30,6 +30,8 @@ DISPLAY_NAME_2 = str(uuid4())
 
 CREATE_DATE = "2022-06-11T12:30:00-08:00"
 
+ORDER_BY = "CREATE_TIME desc"
+
 STAGING_BUCKET = "gs://my-staging-bucket"
 EXPERIMENT_NAME = "fraud-detection-trial-72"
 CREDENTIALS = credentials.AnonymousCredentials()
@@ -272,7 +274,14 @@ EXPERIMENT_RUN_NAME = "my-run"
 
 METRICS = {"accuracy": 0.1}
 PARAMS = {"learning_rate": 0.1}
-
+CLASSIFICATION_METRICS = {
+    "display_name": "my-classification-metrics",
+    "labels": ["cat", "dog"],
+    "matrix": [[9, 1], [1, 9]],
+    "fpr": [0.1, 0.5, 0.9],
+    "tpr": [0.1, 0.7, 0.9],
+    "threshold": [0.9, 0.5, 0.1],
+}
 TEMPLATE_PATH = "pipeline.json"
 
 STEP = 1

@@ -15,15 +15,13 @@
 # limitations under the License.
 #
 
-
-from typing import Dict, Union, Optional, Any
+from typing import Dict, Union, Optional, Any, List
 
 from google.api_core import exceptions
 from google.auth import credentials as auth_credentials
 from google.protobuf import timestamp_pb2
 
 from google.cloud.aiplatform import base
-from google.cloud.aiplatform import gapic
 from google.cloud.aiplatform import pipeline_jobs
 from google.cloud.aiplatform.compat.types import execution as gca_execution
 from google.cloud.aiplatform.metadata import constants
@@ -32,6 +30,8 @@ from google.cloud.aiplatform.metadata import execution
 from google.cloud.aiplatform.metadata import experiment_resources
 from google.cloud.aiplatform.metadata import experiment_run_resource
 from google.cloud.aiplatform.tensorboard import tensorboard_resource
+
+from google.cloud.aiplatform_v1.types import execution as execution_v1
 
 _LOGGER = base.Logger(__name__)
 
@@ -303,7 +303,9 @@ class _ExperimentTracker:
             if tensorboard:
                 self._experiment_run.assign_backing_tensorboard(tensorboard=tensorboard)
 
-            self._experiment_run.update_state(state=gapic.Execution.State.RUNNING)
+            self._experiment_run.update_state(
+                state=execution_v1.Execution.State.RUNNING
+            )
 
         else:
             self._experiment_run = experiment_run_resource.ExperimentRun.create(
@@ -312,7 +314,10 @@ class _ExperimentTracker:
 
         return self._experiment_run
 
-    def end_run(self, state: gapic.Execution.State = gapic.Execution.State.COMPLETE):
+    def end_run(
+        self,
+        state: execution_v1.Execution.State = execution_v1.Execution.State.COMPLETE,
+    ):
         """Ends the the current experiment run.
 
         ```
@@ -370,6 +375,62 @@ class _ExperimentTracker:
         self._validate_experiment_and_run(method_name="log_metrics")
         # query the latest metrics artifact resource before logging.
         self._experiment_run.log_metrics(metrics=metrics)
+
+    def log_classification_metrics(
+        self,
+        *,
+        labels: Optional[List[str]] = None,
+        matrix: Optional[List[List[int]]] = None,
+        fpr: Optional[List[float]] = None,
+        tpr: Optional[List[float]] = None,
+        threshold: Optional[List[float]] = None,
+        display_name: Optional[str] = None,
+    ):
+        """Create an artifact for classification metrics and log to ExperimentRun. Currently support confusion matrix and ROC curve.
+
+        ```
+        my_run = aiplatform.ExperimentRun('my-run', experiment='my-experiment')
+        my_run.log_classification_metrics(
+            display_name='my-classification-metrics',
+            labels=['cat', 'dog'],
+            matrix=[[9, 1], [1, 9]],
+            fpr=[0.1, 0.5, 0.9],
+            tpr=[0.1, 0.7, 0.9],
+            threshold=[0.9, 0.5, 0.1],
+        )
+        ```
+
+        Args:
+            labels (List[str]):
+                Optional. List of label names for the confusion matrix. Must be set if 'matrix' is set.
+            matrix (List[List[int]):
+                Optional. Values for the confusion matrix. Must be set if 'labels' is set.
+            fpr (List[float]):
+                Optional. List of false positive rates for the ROC curve. Must be set if 'tpr' or 'thresholds' is set.
+            tpr (List[float]):
+                Optional. List of true positive rates for the ROC curve. Must be set if 'fpr' or 'thresholds' is set.
+            threshold (List[float]):
+                Optional. List of thresholds for the ROC curve. Must be set if 'fpr' or 'tpr' is set.
+            display_name (str):
+                Optional. The user-defined name for the classification metric artifact.
+
+        Raises:
+            ValueError: if 'labels' and 'matrix' are not set together
+                        or if 'labels' and 'matrix' are not in the same length
+                        or if 'fpr' and 'tpr' and 'threshold' are not set together
+                        or if 'fpr' and 'tpr' and 'threshold' are not in the same length
+        """
+
+        self._validate_experiment_and_run(method_name="log_classification_metrics")
+        # query the latest metrics artifact resource before logging.
+        self._experiment_run.log_classification_metrics(
+            display_name=display_name,
+            labels=labels,
+            matrix=matrix,
+            fpr=fpr,
+            tpr=tpr,
+            threshold=threshold,
+        )
 
     def _validate_experiment_and_run(self, method_name: str):
         """Validates Experiment and Run are set and raises informative error message.

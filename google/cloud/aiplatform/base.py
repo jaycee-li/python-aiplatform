@@ -35,18 +35,22 @@ from typing import (
     Sequence,
     Tuple,
     Type,
+    TypeVar,
     Union,
 )
 
-import proto
-
-from google.api_core import retry
 from google.api_core import operation
+from google.api_core import retry
 from google.auth import credentials as auth_credentials
 from google.cloud.aiplatform import initializer
 from google.cloud.aiplatform import utils
-from google.cloud.aiplatform.compat.types import encryption_spec as gca_encryption_spec
+from google.cloud.aiplatform.compat.types import (
+    encryption_spec as gca_encryption_spec,
+)
 from google.cloud.aiplatform.constants import base as base_constants
+import proto
+
+from google.protobuf import field_mask_pb2 as field_mask
 from google.protobuf import json_format
 
 # This is the default retry callback to be used with get methods.
@@ -1030,6 +1034,7 @@ class VertexAiResourceNounWithFutureManager(VertexAiResourceNoun, FutureManager)
         cls_filter: Callable[[proto.Message], bool] = lambda _: True,
         filter: Optional[str] = None,
         order_by: Optional[str] = None,
+        read_mask: Optional[field_mask.FieldMask] = None,
         project: Optional[str] = None,
         location: Optional[str] = None,
         credentials: Optional[auth_credentials.Credentials] = None,
@@ -1052,6 +1057,14 @@ class VertexAiResourceNounWithFutureManager(VertexAiResourceNoun, FutureManager)
                 Optional. A comma-separated list of fields to order by, sorted in
                 ascending order. Use "desc" after a field name for descending.
                 Supported fields: `display_name`, `create_time`, `update_time`
+            read_mask (field_mask.FieldMask):
+                Optional. A FieldMask with a list of strings passed via `paths`
+                indicating which fields to return for each resource in the response.
+                For example, passing
+                field_mask.FieldMask(paths=["create_time", "update_time"])
+                as `read_mask` would result in each returned VertexAiResourceNoun
+                in the result list only having the "create_time" and
+                "update_time" attributes.
             project (str):
                 Optional. Project to retrieve list from. If not set, project
                 set in aiplatform.init will be used.
@@ -1067,6 +1080,14 @@ class VertexAiResourceNounWithFutureManager(VertexAiResourceNoun, FutureManager)
         Returns:
             List[VertexAiResourceNoun] - A list of SDK resource objects
         """
+        if parent:
+            parent_resources = utils.extract_project_and_location_from_parent(parent)
+            if parent_resources:
+                project, location = (
+                    parent_resources["project"],
+                    parent_resources["location"],
+                )
+
         resource = cls._empty_constructor(
             project=project, location=location, credentials=credentials
         )
@@ -1082,6 +1103,10 @@ class VertexAiResourceNounWithFutureManager(VertexAiResourceNoun, FutureManager)
                 project=project, location=location
             ),
         }
+
+        # `read_mask` is only passed from PipelineJob.list() for now
+        if read_mask is not None:
+            list_request["read_mask"] = read_mask
 
         if filter:
             list_request["filter"] = filter
@@ -1105,6 +1130,7 @@ class VertexAiResourceNounWithFutureManager(VertexAiResourceNoun, FutureManager)
         cls_filter: Callable[[proto.Message], bool] = lambda _: True,
         filter: Optional[str] = None,
         order_by: Optional[str] = None,
+        read_mask: Optional[field_mask.FieldMask] = None,
         project: Optional[str] = None,
         location: Optional[str] = None,
         credentials: Optional[auth_credentials.Credentials] = None,
@@ -1127,6 +1153,14 @@ class VertexAiResourceNounWithFutureManager(VertexAiResourceNoun, FutureManager)
                 Optional. A comma-separated list of fields to order by, sorted in
                 ascending order. Use "desc" after a field name for descending.
                 Supported fields: `display_name`, `create_time`, `update_time`
+            read_mask (field_mask.FieldMask):
+                Optional. A FieldMask with a list of strings passed via `paths`
+                indicating which fields to return for each resource in the response.
+                For example, passing
+                field_mask.FieldMask(paths=["create_time", "update_time"])
+                as `read_mask` would result in each returned VertexAiResourceNoun
+                in the result list only having the "create_time" and
+                "update_time" attributes.
             project (str):
                 Optional. Project to retrieve list from. If not set, project
                 set in aiplatform.init will be used.
@@ -1145,6 +1179,7 @@ class VertexAiResourceNounWithFutureManager(VertexAiResourceNoun, FutureManager)
             cls_filter=cls_filter,
             filter=filter,
             order_by=None,  # This method will handle the ordering locally
+            read_mask=read_mask,
             project=project,
             location=location,
             credentials=credentials,
@@ -1300,8 +1335,8 @@ def get_annotation_class(annotation: type) -> type:
     # typing.Optional
     if getattr(annotation, "__origin__", None) is Union:
         return annotation.__args__[0]
-    else:
-        return annotation
+
+    return annotation
 
 
 class DoneMixin(abc.ABC):
@@ -1340,8 +1375,8 @@ class StatefulResource(DoneMixin):
         """
         if self.state in self._valid_done_states:
             return True
-        else:
-            return False
+
+        return False
 
 
 class VertexAiStatefulResource(VertexAiResourceNounWithFutureManager, StatefulResource):
@@ -1355,5 +1390,35 @@ class VertexAiStatefulResource(VertexAiResourceNounWithFutureManager, StatefulRe
         """
         if self._gca_resource and self._gca_resource.name:
             return super().done()
-        else:
-            return False
+
+        return False
+
+
+# PreviewClass type variable
+PreviewClass = TypeVar("PreviewClass", bound=VertexAiResourceNoun)
+
+
+class PreviewMixin(abc.ABC):
+    """An abstract class for adding preview functionality to certain classes.
+    A child class that inherits from both this Mixin and another parent
+    class allows the child class to introduce preview features.
+    """
+
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def _preview_class(cls: Type[PreviewClass]) -> Type[PreviewClass]:
+        """Class that is currently in preview or has a preview feature.
+        Class must have `resource_name` and `credentials` attributes.
+        """
+        pass
+
+    @property
+    def preview(self) -> PreviewClass:
+        """Exposes features available in preview for this class."""
+        if not hasattr(self, "_preview_instance"):
+            self._preview_instance = self._preview_class(
+                self.resource_name, credentials=self.credentials
+            )
+
+        return self._preview_instance
